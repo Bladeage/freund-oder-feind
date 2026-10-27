@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Freund oder Feind</title>
+<style>
+:root{
+  --bg:#c9c8b4; --bar:#b6b5a0; --ink:#23261c; --ink2:#4b4e3f; --line:#9a9983;
+  --card:#ecebe2; --cardink:#23261c; --cardink2:#5d604f; --sil:#262a1f; --grid:rgba(35,38,28,.08);
+  --blau:#80e0ff; --rot:#ff8080; --blau-ink:#13556f; --rot-ink:#8a2424;
+  --btn:#2f3326; --btn-ink:#efeee4;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2b2f23; --bar:#23261c; --ink:#e6e5d8; --ink2:#b3b2a1; --line:#4f533f;
+    --card:#dedcd0; --btn:#e6e5d8; --btn-ink:#23261c; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2b2f23; --bar:#23261c; --ink:#e6e5d8; --ink2:#b3b2a1; --line:#4f533f;
+  --card:#dedcd0; --btn:#e6e5d8; --btn-ink:#23261c; color-scheme:dark;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+[hidden]{display:none!important}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.cond{font-family:"Arial Narrow",Arial,sans-serif}
+
+.screen{height:100%;display:flex;flex-direction:column}
+.scroll{overflow:auto}
+
+/* Start */
+.wrap{max-width:580px;margin:0 auto;padding:28px 20px 44px;width:100%}
+.fan{position:relative;height:190px;margin:4px 0 26px}
+.mini{position:absolute;left:50%;top:12px;width:200px;height:140px;margin-left:-100px;background:var(--card);border-radius:10px;box-shadow:0 8px 22px rgba(15,17,10,.35);overflow:hidden}
+.mini img{width:100%;height:100%;object-fit:cover;display:block}
+.mini:nth-child(1){transform:translateX(-78px) rotate(-11deg)}
+.mini:nth-child(2){transform:translateX(78px) rotate(10deg)}
+.mini:nth-child(3){transform:translateY(16px)}
+.mini .stamp{opacity:1;font-size:1.3rem;top:12px;border-width:3px}
+h1{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:clamp(2.7rem,11vw,4.2rem);line-height:.92;margin:0 0 14px;letter-spacing:-.01em}
+.lead{margin:0 0 18px;max-width:46ch}
+.sides{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.side{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--bar)}
+.sw{width:18px;height:18px;border:2px solid #000}
+.sw.f{background:var(--blau)}
+.sw.e{background:var(--rot);transform:rotate(45deg) scale(.8)}
+fieldset{border:0;padding:0;margin:0 0 22px}
+legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2rem;margin-bottom:8px}
+.tog{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.tog input{width:22px;height:22px;accent-color:var(--btn)}
+.tog small{color:var(--ink2)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.btn{border:0;border-radius:8px;padding:13px 22px;cursor:pointer;font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.25rem}
+.btn.p{background:var(--btn);color:var(--btn-ink)}
+.btn.g{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.note{font-size:.88rem;color:var(--ink2);max-width:52ch;margin:0 0 6px}
+
+/* Spiel */
+.game{position:relative;overflow:hidden}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px 8px}
+.link{background:none;border:0;color:var(--ink);cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+.count{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.1rem;display:flex;gap:16px}
+.prog{height:4px;background:var(--line);margin:0 16px;border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--ink);transition:width .3s}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px}
+.stack{position:relative;width:min(88vw,370px);height:min(100%,480px)}
+.card{position:absolute;inset:0;background:var(--card);color:var(--cardink);border-radius:14px;box-shadow:0 12px 30px rgba(15,17,10,.35);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform .3s ease}
+.card:active{cursor:grabbing}
+.card.under{transform:translateY(14px) scale(.95);pointer-events:none;filter:brightness(.93)}
+.head{display:flex;justify-content:space-between;padding:12px 16px 0;font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;color:var(--cardink2)}
+.pic{position:relative;margin:10px 12px;border-radius:8px;overflow:hidden;min-height:120px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.pic.fill{background:none}
+.foot{padding:0 16px 16px;font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.5rem}
+.stamp{position:absolute;top:30px;font-family:Impact,"Arial Black",sans-serif;font-size:2.1rem;line-height:1.1;padding:2px 12px;border:4px solid;border-radius:6px;opacity:0;pointer-events:none;background:rgba(236,235,226,.88)}
+.stamp.f{left:18px;color:var(--blau-ink);border-color:var(--blau-ink);transform:rotate(-14deg)}
+.stamp.e{right:18px;color:var(--rot-ink);border-color:var(--rot-ink);transform:rotate(14deg)}
+.controls{display:flex;justify-content:center;align-items:flex-end;gap:40px;padding:4px 16px 18px}
+.choice{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--ink);cursor:pointer;font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.1rem}
+.choice .o{width:66px;height:66px;display:grid;place-items:center;border:3px solid #000;font-size:1.5rem;color:#000}
+.choice.e .o{background:var(--rot);transform:rotate(45deg) scale(.82)}
+.choice.e .o span{transform:rotate(-45deg)}
+.choice.f .o{background:var(--blau);border-radius:4px;width:78px;height:54px}
+.keys{font-size:.85rem;color:var(--ink2);text-align:center;padding:0 0 10px}
+@media (hover:none){.keys{display:none}}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);color:var(--cardink);border-radius:16px 16px 0 0;padding:18px 20px 20px;box-shadow:0 -12px 30px rgba(0,0,0,.3);transform:translateY(105%);transition:transform .3s ease;max-height:80%;overflow:auto;border-top:10px solid var(--line)}
+.sheet.open{transform:none}
+.sheet.f{border-top-color:var(--blau)}
+.sheet.e{border-top-color:var(--rot)}
+.sheet .inner{max-width:560px;margin:0 auto}
+.verdict{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.25rem;margin:0}
+.verdict.ok{color:#2c6a2c}
+.verdict.no{color:var(--rot-ink)}
+.sheet h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:2rem;line-height:1;margin:4px 0 8px}
+.badge{display:inline-block;padding:2px 9px;border:2px solid #000;font-weight:600;color:#000;margin-right:6px}
+.badge.f{background:var(--blau)}
+.badge.e{background:var(--rot)}
+.who{margin:0 0 10px}
+.sheet ul,.kat ul{margin:0 0 10px;padding-left:20px}
+.sheet li,.kat li{margin:2px 0}
+.hint{background:rgba(35,38,28,.07);border-left:4px solid var(--cardink2);padding:8px 12px;margin:0 0 14px;font-size:.95rem}
+
+/* Ende */
+.big{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:clamp(4rem,20vw,6.5rem);line-height:.9;margin:8px 0 4px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 22px;color:var(--ink2)}
+.errs{list-style:none;padding:0;margin:0 0 24px}
+.errs li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+
+/* Katalog */
+.kat h2{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.8rem;margin:26px 0 12px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.kitem{background:var(--card);color:var(--cardink);border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(15,17,10,.2)}
+.kitem .pic{margin:10px;aspect-ratio:2/1;min-height:0}
+.kitem .txt{padding:0 14px 12px}
+.kitem h3{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.35rem;margin:0 0 6px}
+.kitem .who{font-size:.9rem;color:var(--cardink2)}
+.kat .wrap{max-width:1000px}
+.kat .hint{font-size:.88rem}
+
+@media (prefers-reduced-motion: reduce){
+  .card,.sheet,.prog i{transition-duration:.01s!important}
+}
+
+/* Fotos */
+.pic.photo{background:#1a1c15}
+.pic.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
+.card{grid-template-columns:minmax(0,1fr)}
+.card .pic.photo{align-self:stretch;justify-self:stretch}
+.kitem .pic.photo{aspect-ratio:3/2}
+.credit{font-size:.78rem;color:var(--cardink2);margin:0 0 12px;overflow-wrap:anywhere}
+.credit a{color:inherit}
+.kh{font-size:1.5rem;margin:24px 0 4px;display:flex;align-items:center;gap:10px}
+.warn{font-weight:600}
+
+</style>
+</head>
+<body>
+
+<!-- Startseite -->
+<section id="start" class="screen scroll">
+  <div class="wrap">
+    <div class="fan" id="fan" aria-hidden="true"></div>
+    <h1>Freund oder Feind</h1>
+    <p class="lead">Du siehst ein echtes Foto. Wische nach rechts für Freund, nach links für Feind. Danach zeigt die App die Merkmale, an denen du es erkennst.</p>
+    <div class="sides">
+      <div class="side"><span class="sw f"></span>Freund: NATO-Staaten</div>
+      <div class="side"><span class="sw e"></span>Feind: Russland und Belarus</div>
+    </div>
+    <div class="actions">
+      <button class="btn p" id="go">Training starten</button>
+      <button class="btn g" id="openKat">Fahrzeuge und Bildnachweis</button>
+    </div>
+    <p class="note" id="info"></p>
+    <p class="note">Freund und Feind folgen hier der Übungslogik. In der Realität fahren beide Seiten oft dieselben Fahrzeugtypen. Typ allein ist kein sicheres Merkmal.</p>
+    <p class="note warn">Pilot-Stand: Merkmalstexte sind noch nicht vom Fachprüfer belegt.</p>
+  </div>
+</section>
+
+<!-- Spiel -->
+<section id="game" class="screen game" hidden>
+  <div class="top">
+    <button class="link" id="quit">Zur Startseite</button>
+    <div class="count"><span id="cnt">1 / 1</span><span id="ser">Serie 0</span></div>
+  </div>
+  <div class="prog"><i id="bar"></i></div>
+  <div class="stage"><div class="stack" id="stack"></div></div>
+  <div class="controls">
+    <button class="choice e" id="bE" aria-label="Feind"><span class="o"><span>✕</span></span>Feind</button>
+    <button class="choice f" id="bF" aria-label="Freund"><span class="o">✓</span>Freund</button>
+  </div>
+  <div class="keys">Tastatur: Pfeil links für Feind, Pfeil rechts für Freund, Enter für Weiter</div>
+  <div class="sheet" id="sheet" role="dialog" aria-live="polite" aria-label="Auflösung"><div class="inner" id="sheetIn"></div></div>
+</section>
+
+<!-- Ende -->
+<section id="end" class="screen scroll" hidden>
+  <div class="wrap" id="endIn"></div>
+</section>
+
+<!-- Katalog mit Bildnachweis -->
+<section id="kat" class="screen scroll kat" hidden>
+  <div class="wrap">
+    <button class="link" id="katBack">Zur Startseite</button>
+    <div id="katIn"></div>
+  </div>
+</section>
+
+<script src="../assets/manifest.js"></script>
+<script>
+(function(){
+"use strict";
+/* Merkmalstexte aus Demo v0 übernommen, UNGEPRÜFT (Handover Abschnitt 5). */
+const FZ={
+ "Leopard 2A6":{side:"f",who:"Deutschland, Kanada (2A6M), Portugal und weitere",
+  m:["7 Laufrollen, oberes Kettentrum von Seitenschürzen verdeckt","Pfeilförmige Zusatzpanzerung an der Turmfront (ab 2A5)","Langes 120-mm-Rohr L55"],
+  h:"Der Keil an der Turmfront trennt 2A5, 2A6 und 2A7 vom älteren 2A4."},
+ "T-72B3":{side:"e",who:"Russland; Belarus nutzt T-72B-Varianten",
+  m:["6 große Laufrollen, 3 Stützrollen","Flacher, gerundeter Gussturm","Reaktivpanzerung Kontakt-5 auf Turm und Bug","Seit 2022 oft Schutzgitter über dem Turm"],
+  h:"3 Stützrollen: T-72-Familie. 5 Stützrollen: T-80. Seitenschürzen verdecken die Stützrollen im Einsatz oft. Dann helfen Turmform und Laufrollen."},
+ "PT-91 Twardy":{side:"f",who:"Polen",
+  m:["6 große Laufrollen, 3 Stützrollen","Gerundeter Gussturm wie beim T-72","Polnische Reaktivpanzerung ERAWA"],
+  h:"Basis ist der T-72M1. Die Silhouette allein sagt nicht Freund oder Feind. Kennzeichen und Lage entscheiden."}
+};
+const SEITE={freund:"f",feind:"e"};
+const SIDE={f:"Freund",e:"Feind"};
+const ANSICHT={seite:"Seite",front:"Front",schraeg:"Schräg",gelaende:"Gelände"};
+
+/* Unklar lizenzierte Assets nur mit ?unklar=1 (privater Build, Handover Abschnitt 4). */
+const mitUnklar=new URLSearchParams(location.search).get("unklar")==="1";
+const ASSETS=(window.MANIFEST||[]).filter(a=>a.typ==="bild"&&FZ[a.fahrzeug]&&(mitUnklar||a.lizenz_status==="geprueft"));
+const CARDS=ASSETS.map(a=>Object.assign({id:a.id,name:a.fahrzeug,side:SEITE[a.seite],a:a},FZ[a.fahrzeug]));
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const img=a=>`<img src="../${esc(a.datei)}" alt="" draggable="false" loading="lazy">`;
+const credit=a=>`Foto: ${esc(a.urheber||"unbekannt")}, <a href="${esc(a.lizenz_url||a.quelle_url)}" target="_blank" rel="noopener">${esc(a.lizenz)}</a>, <a href="${esc(a.quelle_url)}" target="_blank" rel="noopener">Quelle</a>`;
+
+const $=s=>document.querySelector(s);
+const st={deck:[],idx:0,ok:0,bad:0,streak:0,best:0,locked:false,open:false,fehler:new Map(),last:[]};
+let allBest=0;try{allBest=+(localStorage.getItem("fof-best")||0);}catch(e){}
+
+function show(id){["start","game","end","kat"].forEach(s=>{document.getElementById(s).hidden=s!==id;});}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(list){
+  st.last=list.slice();st.deck=shuffle(list.map(c=>Object.assign({},c,{again:false})));
+  st.idx=0;st.ok=0;st.bad=0;st.streak=0;st.best=0;st.locked=false;st.open=false;st.fehler=new Map();
+  $("#sheet").className="sheet";show("game");renderStack();
+}
+function cardHTML(c,n){
+  return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a)}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
+}
+function setStamps(el,dx){
+  const v=Math.max(0,Math.min(1,dx/90)),w=Math.max(0,Math.min(1,-dx/90));
+  el.querySelector(".stamp.f").style.opacity=v;el.querySelector(".stamp.e").style.opacity=w;
+}
+function renderStack(){
+  const stack=$("#stack");stack.innerHTML="";
+  const cur=st.deck[st.idx],nxt=st.deck[st.idx+1];
+  if(nxt){const u=document.createElement("div");u.className="card under";u.setAttribute("aria-hidden","true");u.innerHTML=cardHTML(nxt,st.idx+2);stack.appendChild(u);}
+  const t=document.createElement("div");t.className="card top";t.innerHTML=cardHTML(cur,st.idx+1);
+  t.style.transition="none";t.style.transform="translateY(14px) scale(.95)";stack.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{t.style.transition="";t.style.transform="";}));
+  bindDrag(t);
+  $("#cnt").textContent=`${st.idx+1} / ${st.deck.length}`;
+  $("#ser").textContent=`Serie ${st.streak}`;
+  $("#bar").style.width=(st.idx/st.deck.length*100)+"%";
+}
+function bindDrag(el){
+  let sx=0,sy=0,dx=0,dy=0,on=false;
+  el.addEventListener("pointerdown",e=>{if(st.locked||st.open)return;on=true;sx=e.clientX;sy=e.clientY;dx=dy=0;el.setPointerCapture(e.pointerId);el.style.transition="none";});
+  el.addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-sx;dy=e.clientY-sy;el.style.transform=`translate(${dx}px,${dy*.3}px) rotate(${dx*.05}deg)`;setStamps(el,dx);});
+  const end=()=>{if(!on)return;on=false;if(Math.abs(dx)>90){commit(dx>0?"f":"e");}else{el.style.transition="";el.style.transform="";setStamps(el,0);}};
+  el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
+}
+function commit(choice){
+  if(st.locked||st.open)return;
+  const el=$("#stack .card.top");if(!el)return;
+  st.locked=true;
+  const dir=choice==="f"?1:-1;
+  setStamps(el,dir*200);
+  el.style.transition="transform .38s ease-in";
+  el.style.transform=`translate(${dir*150}%,-20px) rotate(${dir*22}deg)`;
+  const c=st.deck[st.idx],right=choice===c.side;
+  if(right){st.ok++;st.streak++;st.best=Math.max(st.best,st.streak);}
+  else{
+    st.bad++;st.streak=0;st.fehler.set(c.id,c);
+    if(!c.again)st.deck.splice(Math.min(st.deck.length,st.idx+4),0,Object.assign({},c,{again:true}));
+  }
+  $("#ser").textContent=`Serie ${st.streak}`;
+  setTimeout(()=>showSheet(c,right),260);
+}
+function showSheet(c,right){
+  const sh=$("#sheet");
+  sh.className="sheet "+c.side;
+  $("#sheetIn").innerHTML=
+    `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
+    `<h2>${esc(c.name)}</h2>`+
+    `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>${esc(c.who)}</p>`+
+    `<ul>${c.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
+    (c.h?`<p class="hint">${esc(c.h)}</p>`:"")+
+    `<p class="credit">${credit(c.a)}</p>`+
+    `<button class="btn p" id="next">Weiter</button>`;
+  requestAnimationFrame(()=>sh.classList.add("open"));
+  st.open=true;
+  $("#next").addEventListener("click",next);
+  setTimeout(()=>{const b=$("#next");if(b)b.focus({preventScroll:true});},320);
+}
+function next(){
+  if(!st.open)return;
+  $("#sheet").classList.remove("open");
+  st.open=false;st.locked=false;st.idx++;
+  if(st.idx>=st.deck.length)finish();else renderStack();
+}
+function finish(){
+  if(st.best>allBest){allBest=st.best;try{localStorage.setItem("fof-best",String(allBest));}catch(e){}}
+  const total=st.ok+st.bad,q=total?Math.round(st.ok/total*100):0;
+  const errs=[...st.fehler.values()];
+  $("#endIn").innerHTML=
+    `<h1>Auswertung</h1>`+
+    `<p class="big">${q} %</p>`+
+    `<div class="stats"><span>${st.ok} richtig</span><span>${st.bad} falsch</span><span>Beste Serie ${st.best}</span><span>Rekord-Serie ${allBest}</span></div>`+
+    (errs.length?`<h2 class="cond" style="font-size:1.5rem;margin:0 0 6px">Diese Karten üben</h2><ul class="errs">${errs.map(c=>`<li><span class="badge ${c.side}">${SIDE[c.side]}</span>${esc(c.name)} (${ANSICHT[c.a.ansicht]||""})</li>`).join("")}</ul>`:`<p class="lead">Keine Fehler in dieser Runde.</p>`)+
+    `<div class="actions">`+
+    (errs.length?`<button class="btn p" id="again">Fehler üben</button>`:"")+
+    `<button class="btn ${errs.length?"g":"p"}" id="repeat">Neue Runde</button>`+
+    `<button class="btn g" id="home">Zur Startseite</button></div>`;
+  show("end");
+  if(errs.length)$("#again").addEventListener("click",()=>startGame(errs));
+  $("#repeat").addEventListener("click",()=>startGame(st.last));
+  $("#home").addEventListener("click",()=>show("start"));
+}
+
+/* Start und Katalog */
+function buildFan(){
+  const pick=["T-72B3","PT-91 Twardy","Leopard 2A6"].map(n=>CARDS.find(c=>c.name===n)).filter(Boolean);
+  $("#fan").innerHTML=pick.map((c,i)=>`<div class="mini">${img(c.a)}${i===2?`<div class="stamp f">FREUND</div>`:""}</div>`).join("");
+}
+function buildKat(){
+  $("#katIn").innerHTML=`<h2>Fahrzeuge</h2>`+Object.keys(FZ).map(n=>{
+    const f=FZ[n],list=CARDS.filter(c=>c.name===n);
+    return `<h3 class="kh">${esc(n)} <span class="badge ${f.side}">${SIDE[f.side]}</span></h3><p class="who">${esc(f.who)}</p><ul>${f.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
+      `<div class="kgrid">${list.map(c=>`<article class="kitem"><div class="pic photo">${img(c.a)}</div><div class="txt"><p class="credit">${credit(c.a)}</p></div></article>`).join("")}</div>`;
+  }).join("");
+}
+
+$("#info").textContent=`${CARDS.length} Fotos, ${Object.keys(FZ).length} Fahrzeuge`+(mitUnklar?" (inklusive unklarer Lizenzen)":"");
+$("#go").disabled=CARDS.length===0;
+$("#go").addEventListener("click",()=>startGame(CARDS));
+$("#openKat").addEventListener("click",()=>{show("kat");document.getElementById("kat").scrollTop=0;});
+$("#katBack").addEventListener("click",()=>show("start"));
+$("#quit").addEventListener("click",()=>{$("#sheet").className="sheet";st.open=false;st.locked=false;show("start");});
+$("#bF").addEventListener("click",()=>commit("f"));
+$("#bE").addEventListener("click",()=>commit("e"));
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("game").hidden)return;
+  if(st.open&&(e.key==="Enter"||e.key===" ")){e.preventDefault();next();return;}
+  if(e.key==="ArrowRight"){e.preventDefault();commit("f");}
+  if(e.key==="ArrowLeft"){e.preventDefault();commit("e");}
+});
+
+buildFan();buildKat();
+})();
+</script>
+</body>
+</html>
