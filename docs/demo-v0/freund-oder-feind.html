@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Freund oder Feind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=Stardos+Stencil:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#c9c8b4; --bar:#b6b5a0; --ink:#23261c; --ink2:#4b4e3f; --line:#9a9983;
+  --card:#ecebe2; --cardink:#23261c; --cardink2:#5d604f; --sil:#262a1f; --grid:rgba(35,38,28,.08);
+  --blau:#80e0ff; --rot:#ff8080; --blau-ink:#13556f; --rot-ink:#8a2424;
+  --btn:#2f3326; --btn-ink:#efeee4;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2b2f23; --bar:#23261c; --ink:#e6e5d8; --ink2:#b3b2a1; --line:#4f533f;
+    --card:#dedcd0; --btn:#e6e5d8; --btn-ink:#23261c; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2b2f23; --bar:#23261c; --ink:#e6e5d8; --ink2:#b3b2a1; --line:#4f533f;
+  --card:#dedcd0; --btn:#e6e5d8; --btn-ink:#23261c; color-scheme:dark;
+}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Barlow,"Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+[hidden]{display:none!important}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.cond{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+
+.screen{height:100%;display:flex;flex-direction:column}
+.scroll{overflow:auto}
+
+/* SVG-Klassen */
+.s{fill:var(--sil)} .c{fill:var(--card)}
+.cut{stroke:var(--card);stroke-width:2}
+.cutl{stroke:var(--card);stroke-width:2}
+.gl{stroke:var(--cardink2);stroke-width:1.2;stroke-dasharray:3 5}
+.wire{fill:none;stroke:var(--sil);stroke-width:2}
+
+/* Start */
+.wrap{max-width:580px;margin:0 auto;padding:28px 20px 44px;width:100%}
+.fan{position:relative;height:190px;margin:4px 0 26px}
+.mini{position:absolute;left:50%;top:12px;width:200px;height:140px;margin-left:-100px;background:var(--card);border-radius:10px;box-shadow:0 8px 22px rgba(15,17,10,.35);overflow:hidden}
+.mini svg{width:100%;height:100%;display:block}
+.mini:nth-child(1){transform:translateX(-78px) rotate(-11deg)}
+.mini:nth-child(2){transform:translateX(78px) rotate(10deg)}
+.mini:nth-child(3){transform:translateY(16px)}
+.mini .stamp{opacity:1;font-size:1.3rem;top:12px;border-width:3px}
+h1{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:clamp(2.7rem,11vw,4.2rem);line-height:.92;margin:0 0 14px;letter-spacing:-.01em}
+.lead{margin:0 0 18px;max-width:46ch}
+.sides{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.side{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--bar)}
+.sw{width:18px;height:18px;border:2px solid #000}
+.sw.f{background:var(--blau)}
+.sw.e{background:var(--rot);transform:rotate(45deg) scale(.8)}
+fieldset{border:0;padding:0;margin:0 0 22px}
+legend{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2rem;margin-bottom:8px}
+.tog{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.tog input{width:22px;height:22px;accent-color:var(--btn)}
+.tog small{color:var(--ink2)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.btn{border:0;border-radius:8px;padding:13px 22px;cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.25rem}
+.btn.p{background:var(--btn);color:var(--btn-ink)}
+.btn.g{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.note{font-size:.88rem;color:var(--ink2);max-width:52ch;margin:0 0 6px}
+
+/* Spiel */
+.game{position:relative;overflow:hidden}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px 8px}
+.link{background:none;border:0;color:var(--ink);cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+.count{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.1rem;display:flex;gap:16px}
+.prog{height:4px;background:var(--line);margin:0 16px;border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--ink);transition:width .3s}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px}
+.stack{position:relative;width:min(88vw,370px);height:min(100%,480px)}
+.card{position:absolute;inset:0;background:var(--card);color:var(--cardink);border-radius:14px;box-shadow:0 12px 30px rgba(15,17,10,.35);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform .3s ease}
+.card:active{cursor:grabbing}
+.card.under{transform:translateY(14px) scale(.95);pointer-events:none;filter:brightness(.93)}
+.head{display:flex;justify-content:space-between;padding:12px 16px 0;font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:600;color:var(--cardink2)}
+.pic{position:relative;margin:10px 12px;border-radius:8px;overflow:hidden;min-height:120px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.pic.fill{background:none}
+.pic svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.foot{padding:0 16px 16px;font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.5rem}
+.stamp{position:absolute;top:30px;font-family:"Stardos Stencil",Impact,"Arial Black",sans-serif;font-size:2.1rem;line-height:1.1;padding:2px 12px;border:4px solid;border-radius:6px;opacity:0;pointer-events:none;background:rgba(236,235,226,.88)}
+.stamp.f{left:18px;color:var(--blau-ink);border-color:var(--blau-ink);transform:rotate(-14deg)}
+.stamp.e{right:18px;color:var(--rot-ink);border-color:var(--rot-ink);transform:rotate(14deg)}
+.controls{display:flex;justify-content:center;align-items:flex-end;gap:40px;padding:4px 16px 18px}
+.choice{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:var(--ink);cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.1rem}
+.choice .o{width:66px;height:66px;display:grid;place-items:center;border:3px solid #000;font-size:1.5rem;color:#000}
+.choice.e .o{background:var(--rot);transform:rotate(45deg) scale(.82)}
+.choice.e .o span{transform:rotate(-45deg)}
+.choice.f .o{background:var(--blau);border-radius:4px;width:78px;height:54px}
+.keys{font-size:.85rem;color:var(--ink2);text-align:center;padding:0 0 10px}
+@media (hover:none){.keys{display:none}}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);color:var(--cardink);border-radius:16px 16px 0 0;padding:18px 20px 20px;box-shadow:0 -12px 30px rgba(0,0,0,.3);transform:translateY(105%);transition:transform .3s ease;max-height:80%;overflow:auto;border-top:10px solid var(--line)}
+.sheet.open{transform:none}
+.sheet.f{border-top-color:var(--blau)}
+.sheet.e{border-top-color:var(--rot)}
+.sheet .inner{max-width:560px;margin:0 auto}
+.verdict{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.25rem;margin:0}
+.verdict.ok{color:#2c6a2c}
+.verdict.no{color:var(--rot-ink)}
+.sheet h2{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:2rem;line-height:1;margin:4px 0 8px}
+.badge{display:inline-block;padding:2px 9px;border:2px solid #000;font-weight:600;color:#000;margin-right:6px}
+.badge.f{background:var(--blau)}
+.badge.e{background:var(--rot)}
+.who{margin:0 0 10px}
+.sheet ul,.kat ul{margin:0 0 10px;padding-left:20px}
+.sheet li,.kat li{margin:2px 0}
+.hint{background:rgba(35,38,28,.07);border-left:4px solid var(--cardink2);padding:8px 12px;margin:0 0 14px;font-size:.95rem}
+
+/* Ende */
+.big{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:clamp(4rem,20vw,6.5rem);line-height:.9;margin:8px 0 4px}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 22px;color:var(--ink2)}
+.errs{list-style:none;padding:0;margin:0 0 24px}
+.errs li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+
+/* Katalog */
+.kat h2{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.8rem;margin:26px 0 12px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.kitem{background:var(--card);color:var(--cardink);border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(15,17,10,.2)}
+.kitem .pic{margin:10px;aspect-ratio:2/1;min-height:0}
+.kitem .txt{padding:0 14px 12px}
+.kitem h3{font-family:"Barlow Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;font-size:1.35rem;margin:0 0 6px}
+.kitem .who{font-size:.9rem;color:var(--cardink2)}
+.kat .wrap{max-width:1000px}
+.kat .hint{font-size:.88rem}
+
+@media (prefers-reduced-motion: reduce){
+  .card,.sheet,.prog i{transition-duration:.01s!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Startseite -->
+<section id="start" class="screen scroll">
+  <div class="wrap">
+    <div class="fan" id="fan" aria-hidden="true"></div>
+    <h1>Freund oder Feind</h1>
+    <p class="lead">Du siehst eine Karte. Wische nach rechts für Freund, nach links für Feind. Danach zeigt die App die Merkmale, an denen du es erkennst.</p>
+    <div class="sides">
+      <div class="side"><span class="sw f"></span>Freund: NATO-Staaten</div>
+      <div class="side"><span class="sw e"></span>Feind: Russland und Belarus</div>
+    </div>
+    <fieldset id="cats">
+      <legend>Kartensätze</legend>
+      <label class="tog"><input type="checkbox" value="fz" checked><span>Fahrzeuge <small data-n="fz"></small></span></label>
+      <label class="tog"><input type="checkbox" value="tarn" checked><span>Tarnmuster <small data-n="tarn"></small></span></label>
+      <label class="tog"><input type="checkbox" value="zei" checked><span>Kennzeichen und taktische Zeichen <small data-n="zei"></small></span></label>
+    </fieldset>
+    <div class="actions">
+      <button class="btn p" id="go">Training starten</button>
+      <button class="btn g" id="openKat">Alle Karten ansehen</button>
+    </div>
+    <p class="note">Freund und Feind folgen hier der Übungslogik. In der Realität fahren beide Seiten oft dieselben Fahrzeugtypen. Typ allein ist kein sicheres Merkmal.</p>
+    <p class="note">Silhouetten sind schematisch und nicht maßstabsgetreu. Tarnmuster sind gezeichnete Annäherungen, keine Originale.</p>
+  </div>
+</section>
+
+<!-- Spiel -->
+<section id="game" class="screen game" hidden>
+  <div class="top">
+    <button class="link" id="quit">Zur Startseite</button>
+    <div class="count"><span id="cnt">1 / 1</span><span id="ser">Serie 0</span></div>
+  </div>
+  <div class="prog"><i id="bar"></i></div>
+  <div class="stage"><div class="stack" id="stack"></div></div>
+  <div class="controls">
+    <button class="choice e" id="bE" aria-label="Feind"><span class="o"><span>✕</span></span>Feind</button>
+    <button class="choice f" id="bF" aria-label="Freund"><span class="o">✓</span>Freund</button>
+  </div>
+  <div class="keys">Tastatur: Pfeil links für Feind, Pfeil rechts für Freund, Enter für Weiter</div>
+  <div class="sheet" id="sheet" role="dialog" aria-live="polite" aria-label="Auflösung"><div class="inner" id="sheetIn"></div></div>
+</section>
+
+<!-- Ende -->
+<section id="end" class="screen scroll" hidden>
+  <div class="wrap" id="endIn"></div>
+</section>
+
+<!-- Katalog -->
+<section id="kat" class="screen scroll kat" hidden>
+  <div class="wrap">
+    <button class="link" id="katBack">Zur Startseite</button>
+    <div id="katIn"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+"use strict";
+const W=440,H=220,G=196;
+const f1=n=>(+n).toFixed(1);
+const P=pts=>pts.map(p=>f1(p[0])+","+f1(p[1])).join(" ");
+const poly=(pts,cls)=>`<polygon class="${cls||"s"}" points="${P(pts)}"/>`;
+const rect=(x,y,w,h,cls,rx)=>`<rect class="${cls||"s"}" x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" rx="${rx||0}"/>`;
+const circ=(x,y,r,cls)=>`<circle class="${cls}" cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}"/>`;
+const wheel=(x,y,r)=>circ(x,y,r,"s cut")+circ(x,y,Math.max(2,r*.24),"c");
+const ground=()=>`<line class="gl" x1="14" y1="${G+1}" x2="${W-14}" y2="${G+1}"/>`;
+
+function rng(seed){let a=seed>>>0;return function(){a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- Fahrzeug-Silhouetten (schematisch) ---------- */
+function turretShape(t,tx,top){
+  const w=t.w,h=t.h,b=t.b||0,l=tx-w/2,r=tx+w/2;
+  let pts,gx=r,gy=top-h*.5;
+  switch(t.type){
+    case "dome":
+      return {svg:`<path class="s" d="M${f1(l)},${f1(top)} C${f1(l)},${f1(top-h*.75)} ${f1(tx-w*.2)},${f1(top-h)} ${f1(tx+w*.05)},${f1(top-h)} C${f1(r-w*.12)},${f1(top-h)} ${f1(r)},${f1(top-h*.6)} ${f1(r+6)},${f1(top)} Z"/>`,gx:r-6,gy:top-h*.5,l:l,r:r};
+    case "box": pts=[[l,top],[l-b,top-h*.3],[l-b,top-h],[r-8,top-h],[r,top-h*.7],[r,top]];break;
+    case "wedge": pts=[[l,top],[l-b,top-h*.3],[l-b,top-h],[r-4,top-h],[r+w*.34,top-h*.4],[r+w*.05,top-h*.12],[r,top]];gx=r+w*.2;gy=top-h*.45;break;
+    case "abrams": pts=[[l,top],[l-b,top-h*.2],[l-b,top-h],[tx+w*.15,top-h],[r+12,top-h*.32],[r+12,top]];gx=r+8;gy=top-h*.45;break;
+    case "t90m": pts=[[l,top],[l-b,top-h*.15],[l-b,top-h],[tx+w*.2,top-h-2],[r+10,top-h*.42],[r+4,top]];gx=r+4;break;
+    case "ifv": pts=[[l,top],[l+5,top-h],[r-8,top-h],[r,top-h*.35],[r,top]];gx=r-4;gy=top-h*.62;break;
+    case "puma": pts=[[l,top],[l,top-h],[r-14,top-h],[r,top-h*.35],[r,top]];gx=r-2;break;
+    case "spg": pts=[[l,top],[l-4,top-h*.55],[l,top-h],[r-16,top-h],[r,top-h*.55],[r,top]];gx=r-6;gy=top-h*.55;break;
+  }
+  return {svg:poly(pts),gx:gx,gy:gy,l:l,r:r};
+}
+function gun(g,gx,gy){
+  const th=g.th||6;
+  let s=rect(gx-12,gy-th/2,g.len+12,th);
+  if(g.ev) s+=rect(gx+g.len*.42,gy-th/2-2.5,g.len*.12,th+5,"s",2);
+  if(g.brake) s+=rect(gx+g.len-16,gy-th/2-3.5,16,th+7,"s",1.5);
+  return `<g transform="rotate(${g.elev||0} ${f1(gx)} ${f1(gy)})">${s}</g>`;
+}
+function extras(o,T,top){
+  const t=o.turret,h=t.h,tx=(T.l+T.r)/2;let s="";
+  if(o.cupola) s+=rect(T.l+t.w*.28,top-h-7,18,8,"s",2);
+  if(o.era){for(let i=0;i<4;i++){const fx=i/3;const x=tx+fx*t.w*.45;const y=top-h*(1-.4*fx*fx)-4;s+=rect(x-4.5,y-3.5,9,7,"s cut");}}
+  if(o.atgm==="side") s+=rect(T.l-16,top-h*.95,30,13,"s cut",1);
+  if(o.atgm==="top") s+=rect(T.l+4,top-h-9,t.w*.9,6,"s",2);
+  if(o.sensor) s+=rect(T.l+t.w*.25,top-h-10,16,10,"s",1);
+  if(o.cage){const y1=top-h-24,y0=top-h+2;s+=`<path class="wire" d="M${f1(T.l-6)},${f1(y0)} V${f1(y1)} H${f1(T.r+6)} V${f1(y0)} M${f1(T.l+22)},${f1(y1)} V${f1(top-h)} M${f1(T.l+52)},${f1(y1)} V${f1(top-h)} M${f1(T.l+82)},${f1(y1)} V${f1(top-h)}"/>`;}
+  return s;
+}
+function tracked(o){
+  const x0=(W-o.len)/2-22,x1=x0+o.len,wr=o.wr,tH=2*wr+16,tTop=G-tH,hullTop=tTop-o.hullH+4,gl=o.glacis;
+  let s=ground();
+  s+=poly([[x0+4,tTop+12],[x0-6,hullTop+8],[x0+4,hullTop],[x1-gl,hullTop],[x1+12,tTop+6],[x1+2,tTop+14]]);
+  s+=rect(x0,tTop,o.len,tH,"s",tH/2);
+  const er=wr*.62,ex0=x0+tH*.42,ex1=x1-tH*.42,ey=tTop+tH*.42;
+  s+=circ(ex0,ey,er,"s cut")+circ(ex1,ey,er,"s cut");
+  const a=ex0+er+wr*.85,b=ex1-er-wr*.85,n=o.wheels,sp=(b-a)/(n-1),r=Math.min(wr,sp/2-1.5),cy=G-6-r;
+  if(!o.skirt&&o.rr){for(let i=0;i<o.rr;i++){s+=circ(a+(b-a)*(i+.5)/o.rr,tTop+7,4.5,"s cut");}}
+  for(let i=0;i<n;i++) s+=wheel(a+sp*i,cy,r);
+  if(o.skirt){const sb=tTop-2+tH*.42;s+=rect(x0+8,tTop-2,o.len-16,tH*.42)+`<line class="cutl" x1="${f1(x0+10)}" y1="${f1(sb)}" x2="${f1(x1-10)}" y2="${f1(sb)}"/>`;}
+  const T=turretShape(o.turret,x0+o.len*o.turret.x,hullTop);
+  s+=gun(o.gun,T.gx,T.gy)+T.svg+extras(o,T,hullTop);
+  return s;
+}
+function wheeled(o){
+  const x0=(W-o.len)/2-20,x1=x0+o.len,wr=o.wr,cy=G-wr,hb=G-wr*1.15,ht=hb-o.hullH;
+  let s=ground();
+  const pts=o.shape==="boxer"
+    ?[[x0,hb],[x0-2,ht+8],[x0+6,ht],[x1-38,ht],[x1+4,ht+o.hullH*.5],[x1+4,hb-8],[x1-6,hb]]
+    :[[x0+18,hb+4],[x0-4,ht+o.hullH*.5],[x0+10,ht],[x1-56,ht],[x1+10,ht+o.hullH*.6],[x1-16,hb+4]];
+  s+=poly(pts);
+  o.axles.forEach(f=>{s+=wheel(x0+o.len*f,cy,wr);});
+  if(o.turret){const T=turretShape(o.turret,x0+o.len*o.turret.x,ht);s+=gun(o.gun,T.gx,T.gy)+T.svg+extras(o,T,ht);}
+  if(o.rws){const x=x0+o.len*.55;s+=rect(x-14,ht-12,28,12,"s",2)+rect(x+10,ht-9,28,3);}
+  return s;
+}
+const veh=o=>o.w?wheeled(o):tracked(o);
+
+/* ---------- Tarnmuster (Annäherungen) ---------- */
+function blob(r,cx,cy,rx,ry,rot){
+  const n=7+Math.floor(r()*4),ro=rot===undefined?r()*Math.PI:rot,pts=[];
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2,k=.6+r()*.6,x=Math.cos(a)*rx*k,y=Math.sin(a)*ry*k;pts.push([cx+x*Math.cos(ro)-y*Math.sin(ro),cy+x*Math.sin(ro)+y*Math.cos(ro)]);}
+  const pm=pts[n-1],p0=pts[0];let d=`M${f1((pm[0]+p0[0])/2)},${f1((pm[1]+p0[1])/2)}`;
+  for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n];d+=`Q${f1(p[0])},${f1(p[1])} ${f1((p[0]+q[0])/2)},${f1((p[1]+q[1])/2)}`;}
+  return d+"Z";
+}
+function blobCamo(seed,bg,layers,twig){
+  const r=rng(seed);let s=`<rect width="${W}" height="${H}" fill="${bg}"/>`;
+  layers.forEach(([col,n,mn,mx])=>{let d="";for(let i=0;i<n;i++){const rx=mn+r()*(mx-mn);d+=blob(r,r()*W,r()*H,rx,rx*(.5+r()*.7));}s+=`<path fill="${col}" d="${d}"/>`;});
+  if(twig){let d="";for(let i=0;i<twig[1];i++){d+=blob(r,r()*W,r()*H,1.4+r()*1.4,9+r()*14,Math.PI/2+(r()-.5)*.3);}s+=`<path fill="${twig[0]}" d="${d}"/>`;}
+  return s;
+}
+function flecktarn(seed){
+  const r=rng(seed);let s=`<rect width="${W}" height="${H}" fill="#a3a77c"/>`;
+  [["#78833f",170,6,11],["#3f4d2c",220,4,9],["#5f4431",120,3,7],["#1e201a",110,2,5]].forEach(([col,n,mn,mx])=>{
+    let c="";for(let i=0;i<n;i++){const cx=r()*W,cy=r()*H,k=1+Math.floor(r()*4);for(let j=0;j<k;j++){c+=`<circle cx="${f1(cx+(r()-.5)*mx*2)}" cy="${f1(cy+(r()-.5)*mx*2)}" r="${f1(mn+r()*(mx-mn))}"/>`;}}
+    s+=`<g fill="${col}">${c}</g>`;});
+  return s;
+}
+function pixelCamo(seed,bg,layers,cell){
+  const r=rng(seed),cols=Math.ceil(W/cell),rows=Math.ceil(H/cell),g=new Array(cols*rows).fill(-1);
+  const mark=(x,y,li)=>{if(x>=0&&x<cols&&y>=0&&y<rows)g[y*cols+x]=li;};
+  layers.forEach(([,blobs,steps],li)=>{for(let b=0;b<blobs;b++){let x=Math.floor(r()*cols),y=Math.floor(r()*rows);for(let k=0;k<steps;k++){mark(x,y,li);mark(x+1,y,li);mark(x,y+1,li);mark(x+1,y+1,li);const d=Math.floor(r()*4);x+=d===0?1:d===1?-1:0;y+=d===2?1:d===3?-1:0;}}});
+  let s=`<rect width="${W}" height="${H}" fill="${bg}"/>`;
+  layers.forEach(([col],li)=>{let d="";for(let y=0;y<rows;y++){let x=0;while(x<cols){if(g[y*cols+x]===li){let e=x;while(e<cols&&g[y*cols+e]===li)e++;d+=`M${x*cell},${y*cell}h${(e-x)*cell}v${cell}h${-(e-x)*cell}z`;x=e;}else x++;}}s+=`<path fill="${col}" d="${d}"/>`;});
+  return s;
+}
+function pantera(seed){
+  let s=blobCamo(seed,"#7f8b55",[["#4a5a33",30,22,46],["#3c4a2b",20,16,34],["#6c4c32",28,18,40]]);
+  const r=rng(seed+7);let d="";
+  for(let i=0;i<34;i++){let x=r()*W,y=r()*H;d+=`M${f1(x)},${f1(y)}`;for(let k=0;k<4;k++){x+=8+r()*14;y+=(r()-.5)*16;d+=`L${f1(x)},${f1(y)}`;}}
+  return s+`<path d="${d}" fill="none" stroke="#1f211b" stroke-width="3.5"/>`;
+}
+
+/* ---------- Kennzeichen und taktische Zeichen ---------- */
+function plate(col){return `<rect width="${W}" height="${H}" fill="${col}"/><line x1="0" y1="34" x2="${W}" y2="34" stroke="rgba(0,0,0,.25)" stroke-width="2"/><line x1="0" y1="188" x2="${W}" y2="188" stroke="rgba(0,0,0,.25)" stroke-width="2"/>`;}
+function kreuz(){
+  const cx=220,cy=110,a=9,c=30,d=58;
+  const pts=[[a,-a],[d,-c],[d,c],[a,a],[c,d],[-c,d],[-a,a],[-d,c],[-d,-c],[-a,-a],[-c,-d],[c,-d]].map(p=>[cx+p[0],cy+p[1]]);
+  return plate("#56613f")+`<polygon points="${P(pts)}" fill="#f4f3ee" stroke="#f4f3ee" stroke-width="12" stroke-linejoin="miter"/><polygon points="${P(pts)}" fill="#141414"/>`;
+}
+function letter(d){return plate("#535c3f")+`<path d="${d}" fill="none" stroke="#efeee6" stroke-width="24" stroke-linecap="square" stroke-linejoin="miter"/>`;}
+function vs17(){
+  let g="";[[128,72],[312,72],[128,148],[312,148]].forEach(p=>{g+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#2a2a2a"/>`;});
+  return `<rect width="${W}" height="${H}" fill="#3f4632"/><rect x="0" y="0" width="${W}" height="${H}" fill="url(#none)"/><g transform="rotate(-6 220 110)"><rect x="120" y="64" width="200" height="92" fill="#ff6a1f"/>${g}</g>`;
+}
+function app6(side,sym){
+  let s=`<rect width="${W}" height="${H}" fill="#f2f1e9"/>`;
+  for(let x=0;x<=W;x+=22)s+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="rgba(0,0,0,.07)"/>`;
+  for(let y=0;y<=H;y+=22)s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="rgba(0,0,0,.07)"/>`;
+  const st=`fill="none" stroke="#000" stroke-width="4"`;
+  if(side==="f"){
+    s+=`<rect x="145" y="60" width="150" height="100" fill="#80e0ff" stroke="#000" stroke-width="4"/>`;
+    if(sym==="pz"||sym==="mech")s+=`<ellipse cx="220" cy="110" rx="48" ry="22" ${st}/>`;
+    if(sym==="mech")s+=`<path d="M145 60 L295 160 M295 60 L145 160" ${st}/>`;
+    if(sym==="art")s+=`<circle cx="220" cy="110" r="12" fill="#000"/>`;
+  }else{
+    s+=`<polygon points="220,38 292,110 220,182 148,110" fill="#ff8080" stroke="#000" stroke-width="4"/>`;
+    if(sym==="pz"||sym==="mech")s+=`<ellipse cx="220" cy="110" rx="34" ry="16" ${st}/>`;
+    if(sym==="mech")s+=`<path d="M184 74 L256 146 M256 74 L184 146" ${st}/>`;
+    if(sym==="art")s+=`<circle cx="220" cy="110" r="11" fill="#000"/>`;
+  }
+  return s;
+}
+
+/* ---------- Karten ---------- */
+const KAT={fz:"Fahrzeug",tarn:"Tarnmuster",zei:"Kennzeichen"};
+const KATP={fz:"Fahrzeuge",tarn:"Tarnmuster",zei:"Kennzeichen und taktische Zeichen"};
+const RR_HINT="Seitenschürzen verdecken die Stützrollen im Einsatz oft. Dann helfen Turmform und Laufrollen.";
+const CARDS=[
+ {id:"leo2a6",cat:"fz",side:"f",name:"Leopard 2A6",who:"Deutschland, Kanada (2A6M), Portugal und weitere",
+  m:["7 Laufrollen, oberes Kettentrum von Seitenschürzen verdeckt","Pfeilförmige Zusatzpanzerung an der Turmfront (ab 2A5)","Langes 120-mm-Rohr L55"],
+  h:"Der Keil an der Turmfront trennt 2A5, 2A6 und 2A7 vom älteren 2A4.",
+  d:()=>veh({len:300,wheels:7,wr:15,skirt:1,hullH:30,glacis:46,turret:{type:"wedge",x:.47,w:118,h:34,b:22},gun:{len:150,th:6,ev:1},cupola:1})},
+ {id:"leo2a4",cat:"fz",side:"f",name:"Leopard 2A4",who:"u. a. Polen, Griechenland, Spanien, Türkei, Finnland",
+  m:["7 Laufrollen, Seitenschürzen","Senkrechte, flache Turmfront ohne Keil","120-mm-Rohr L44, kürzer als beim 2A6"],
+  h:"Leopard 2 fahren auch Staaten außerhalb der NATO, z. B. Österreich und die Schweiz.",
+  d:()=>veh({len:300,wheels:7,wr:15,skirt:1,hullH:30,glacis:46,turret:{type:"box",x:.47,w:118,h:34,b:20},gun:{len:128,th:6,ev:1},cupola:1})},
+ {id:"m1a2",cat:"fz",side:"f",name:"M1A2 Abrams",who:"USA, Polen",
+  m:["7 Laufrollen, Seitenschürzen","Flacher, breiter Turm mit stark geneigter Front","Großer Staukorb am Turmheck","Gasturbine: heißer Abgasstrom am Heck"],
+  h:"Flacher Turm plus großer Staukorb: typisch Abrams.",
+  d:()=>veh({len:305,wheels:7,wr:15,skirt:1,hullH:28,glacis:54,turret:{type:"abrams",x:.46,w:130,h:28,b:30},gun:{len:128,th:6,ev:1},cupola:1})},
+ {id:"ch2",cat:"fz",side:"f",name:"Challenger 2",who:"Großbritannien",
+  m:["6 Laufrollen, Seitenschürzen","Kantiger Turm mit glatten, steilen Flächen","Gezogene 120-mm-Kanone L30"],
+  h:"6 Laufrollen trennen ihn vom Leopard 2 mit 7. Nachfolger ist der Challenger 3.",
+  d:()=>veh({len:300,wheels:6,wr:17,skirt:1,hullH:30,glacis:50,turret:{type:"box",x:.47,w:126,h:34,b:16},gun:{len:130,th:6,ev:1},cupola:1})},
+ {id:"leclerc",cat:"fz",side:"f",name:"Leclerc",who:"Frankreich",
+  m:["6 Laufrollen, Seitenschürzen","Kompakter, kantiger Turm mit langem Turmheck","Ladeautomat, Besatzung nur 3 Mann"],
+  h:"Das lange Turmheck kommt vom Ladeautomaten.",
+  d:()=>veh({len:282,wheels:6,wr:16,skirt:1,hullH:28,glacis:48,turret:{type:"box",x:.44,w:112,h:31,b:34},gun:{len:130,th:6}})},
+ {id:"pt91",cat:"fz",side:"f",name:"PT-91 Twardy",who:"Polen",
+  m:["6 große Laufrollen, 3 Stützrollen","Gerundeter Gussturm wie beim T-72","Polnische Reaktivpanzerung ERAWA"],
+  h:"Basis ist der T-72M1. Die Silhouette allein sagt nicht Freund oder Feind. Kennzeichen und Lage entscheiden.",
+  d:()=>veh({len:290,wheels:6,wr:20,rr:3,hullH:26,glacis:52,turret:{type:"dome",x:.5,w:110,h:36},gun:{len:135,th:6,ev:1},era:1})},
+ {id:"puma",cat:"fz",side:"f",name:"Schützenpanzer Puma",who:"Deutschland",
+  m:["6 Laufrollen, Seitenschürzen","Sehr flacher, unbemannter Turm","30-mm-Maschinenkanone","Hohe, kantige Wanne mit flachem Dach"],
+  h:"Der Turm hat keine Luken. Die Besatzung sitzt in der Wanne.",
+  d:()=>veh({len:300,wheels:6,wr:17,skirt:1,hullH:46,glacis:62,turret:{type:"puma",x:.44,w:124,h:18},gun:{len:92,th:4},sensor:1})},
+ {id:"cv90",cat:"fz",side:"f",name:"CV90",who:"u. a. Schweden, Norwegen, Dänemark, Finnland, Niederlande, Estland",
+  m:["7 kleine Laufrollen","Turm etwa in Fahrzeugmitte","Maschinenkanone 30, 35 oder 40 mm je nach Version"],
+  h:"Viele Staaten in Nordeuropa fahren CV90. 7 Laufrollen bei einem Schützenpanzer sind ein guter Anker.",
+  d:()=>veh({len:280,wheels:7,wr:13,skirt:1,hullH:40,glacis:52,turret:{type:"ifv",x:.46,w:84,h:28},gun:{len:96,th:4},cupola:1})},
+ {id:"bradley",cat:"fz",side:"f",name:"M2 Bradley",who:"USA",
+  m:["6 Laufrollen, Seitenschürzen","Hohe, steile Wannenfront","Zweimann-Turm mit 25-mm-Kanone","Starter für TOW-Lenkflugkörper an der linken Turmseite"],
+  h:"Hoher Kasten mit kleinem Turm und seitlichem Starter: typisch Bradley.",
+  d:()=>veh({len:285,wheels:6,wr:16,skirt:1,hullH:50,glacis:26,turret:{type:"ifv",x:.5,w:86,h:26},gun:{len:70,th:3},atgm:"side"})},
+ {id:"boxer",cat:"fz",side:"f",name:"Boxer",who:"Deutschland, Niederlande, Großbritannien, Litauen",
+  m:["8 Räder (8x8)","Sehr hoher, kastenförmiger Aufbau","Steile Seitenwände"],
+  h:"Das Missionsmodul sitzt austauschbar auf dem Fahrmodul. Deshalb wirkt der Aufbau so hoch.",
+  d:()=>veh({w:1,shape:"boxer",len:300,wr:19,hullH:74,axles:[.13,.32,.64,.85],rws:1})},
+ {id:"pzh2000",cat:"fz",side:"f",name:"Panzerhaubitze 2000",who:"u. a. Deutschland, Niederlande, Italien, Griechenland, Litauen, Ungarn",
+  m:["7 Laufrollen","Sehr großer, kastenförmiger Turm","Langes 155-mm-Rohr L52 mit Mündungsbremse"],
+  h:"Großer Turm plus sehr langes Rohr: Artillerie, kein Kampfpanzer.",
+  d:()=>veh({len:310,wheels:7,wr:14,skirt:1,hullH:34,glacis:52,turret:{type:"spg",x:.36,w:150,h:54},gun:{len:200,th:6,brake:1,elev:-5}})},
+ {id:"t72b3",cat:"fz",side:"e",name:"T-72B3",who:"Russland; Belarus nutzt T-72B-Varianten",
+  m:["6 große Laufrollen, 3 Stützrollen","Flacher, gerundeter Gussturm","Reaktivpanzerung Kontakt-5 auf Turm und Bug","Seit 2022 oft Schutzgitter über dem Turm"],
+  h:"3 Stützrollen: T-72-Familie. 5 Stützrollen: T-80. "+RR_HINT,
+  d:()=>veh({len:290,wheels:6,wr:20,rr:3,hullH:26,glacis:52,turret:{type:"dome",x:.5,w:110,h:36},gun:{len:135,th:6,ev:1},era:1,cage:1})},
+ {id:"t80bvm",cat:"fz",side:"e",name:"T-80BVM",who:"Russland",
+  m:["6 Laufrollen, 5 Stützrollen","Gerundeter Turm mit Reaktivpanzerung","Gasturbine, flaches Heck"],
+  h:"Zähle die Stützrollen. 5 Stück passen zur T-80-Familie. "+RR_HINT,
+  d:()=>veh({len:295,wheels:6,wr:18,rr:5,hullH:26,glacis:52,turret:{type:"dome",x:.5,w:108,h:34},gun:{len:135,th:6,ev:1},era:1})},
+ {id:"t90m",cat:"fz",side:"e",name:"T-90M",who:"Russland",
+  m:["6 große Laufrollen, 3 Stützrollen","Kantiger, geschweißter Turm mit großem Staukasten hinten","Reaktivpanzerung Relikt"],
+  h:"Laufwerk wie T-72, aber der Turm ist eckig statt rund.",
+  d:()=>veh({len:290,wheels:6,wr:20,rr:3,hullH:26,glacis:52,turret:{type:"t90m",x:.5,w:112,h:36,b:26},gun:{len:135,th:6,ev:1},era:1})},
+ {id:"bmp2",cat:"fz",side:"e",name:"BMP-2",who:"Russland, Belarus",
+  m:["6 Laufrollen, 3 Stützrollen","Lange, flache, spitze Bugpartie","Kleiner Turm mit langer 30-mm-Kanone","Lenkflugkörper-Starter auf dem Turmdach"],
+  h:"Achtung: BMP-Varianten fahren auch NATO-Staaten, z. B. Tschechien und die Slowakei (BVP-2) oder Griechenland (BMP-1). Typ allein reicht nicht.",
+  d:()=>veh({len:270,wheels:6,wr:16,rr:3,hullH:32,glacis:86,turret:{type:"ifv",x:.5,w:60,h:22},gun:{len:96,th:3},atgm:"top"})},
+ {id:"btr82a",cat:"fz",side:"e",name:"BTR-82A",who:"Russland",
+  m:["8 Räder, große Lücke zwischen 2. und 3. Achse","Bootsförmige Wanne mit spitzem Bug","Kleiner Turm mit 30-mm-Kanone"],
+  h:"In der Achslücke liegt die seitliche Ausstiegsluke.",
+  d:()=>veh({w:1,shape:"btr",len:290,wr:17,hullH:50,axles:[.12,.31,.62,.81],turret:{type:"ifv",x:.38,w:46,h:18},gun:{len:72,th:3}})},
+ {id:"2s19",cat:"fz",side:"e",name:"2S19 Msta-S",who:"Russland",
+  m:["6 Laufrollen","Sehr großer Turm","Langes 152-mm-Rohr mit Mündungsbremse"],
+  h:"Vergleich mit der PzH 2000: beide haben großen Turm und langes Rohr. Laufrollen zählen: 6 statt 7.",
+  d:()=>veh({len:300,wheels:6,wr:18,rr:5,hullH:30,glacis:52,turret:{type:"spg",x:.42,w:150,h:52},gun:{len:185,th:6,brake:1,elev:-5}})},
+
+ {id:"flecktarn",cat:"tarn",side:"f",fill:1,name:"Flecktarn",who:"Deutschland",
+  m:["Viele kleine Punkte in 5 Farben","Hellgrün, Dunkelgrün, Braun und Schwarz auf hellem Oliv"],
+  h:"Ähnliche Muster nutzen auch andere Staaten, z. B. Dänemark (M/84). Muster allein ist kein sicheres Merkmal.",
+  d:()=>flecktarn(11)},
+ {id:"mtp",cat:"tarn",side:"f",fill:1,name:"MTP",who:"Großbritannien",
+  m:["Weiche, große Flecken","Sandiger Grund mit Grün- und Brauntönen","Feine senkrechte Zweig-Elemente"],
+  h:"MTP basiert auf MultiCam. Es sieht dem US-Muster OCP sehr ähnlich.",
+  d:()=>blobCamo(23,"#b4a27c",[["#8b8c5d",70,18,40],["#6b5236",60,14,30],["#3f4a2f",55,10,24],["#d2c3a0",40,6,14]],["#4b3b2b",60])},
+ {id:"ocp",cat:"tarn",side:"f",fill:1,name:"OCP (Scorpion W2)",who:"USA (Army und Air Force)",
+  m:["Kleinere weiche Flecken","Heller Sandgrund mit Grün, Braun und Creme","Feine senkrechte Zweig-Elemente"],
+  h:"OCP und MTP sind schwer zu trennen. Beide sind Freund.",
+  d:()=>blobCamo(37,"#c4b693",[["#9a9469",80,12,28],["#6d5b40",70,10,22],["#55603f",60,8,18],["#e3d8b8",50,5,10]],["#3e3a2c",70])},
+ {id:"pantera",cat:"tarn",side:"f",fill:1,name:"wz. 93 Pantera",who:"Polen",
+  m:["Große Flecken in Dunkelgrün und Braun auf hellem Grün","Dunkle, gezackte Striche"],
+  h:"Gezeichnete Annäherung. Am Original auf Farbe und Größe der Flecken achten.",
+  d:()=>pantera(41)},
+ {id:"emr",cat:"tarn",side:"e",fill:1,name:"EMR (Ziffer)",who:"Russland",
+  m:["Pixelmuster aus kleinen Quadraten","Grün, Braun und Schwarz auf hellem Grau-Grün"],
+  h:"Pixelmuster gibt es auch in der NATO, z. B. MARPAT der US-Marines und CADPAT in Kanada. Farben beachten.",
+  d:()=>pixelCamo(53,"#a3a68a",[["#727c4c",40,90],["#4a5434",35,70],["#5e4936",25,45],["#232420",18,25]],5)},
+
+ {id:"app6fpz",cat:"zei",side:"f",fill:1,name:"Taktisches Zeichen: eigene Panzertruppe",who:"NATO-Symbolik (APP-6)",
+  m:["Rechteck = eigene Kräfte","Hellblau gefüllt","Ellipse = Panzer"],
+  h:"Merkhilfe: Rechteck ist ruhig und eckig wie ein Kasernenblock. Raute ist die Bedrohung.",
+  d:()=>app6("f","pz")},
+ {id:"app6hpz",cat:"zei",side:"e",fill:1,name:"Taktisches Zeichen: feindliche Panzertruppe",who:"NATO-Symbolik (APP-6)",
+  m:["Raute = feindliche Kräfte","Rot gefüllt","Ellipse = Panzer"],
+  h:"Die Rahmenform zählt, nicht nur die Farbe. Auf Schwarz-Weiß-Karten fehlt die Farbe.",
+  d:()=>app6("h","pz")},
+ {id:"app6fart",cat:"zei",side:"f",fill:1,name:"Taktisches Zeichen: eigene Artillerie",who:"NATO-Symbolik (APP-6)",
+  m:["Rechteck = eigene Kräfte","Gefüllter Punkt = Artillerie"],
+  h:"",
+  d:()=>app6("f","art")},
+ {id:"app6hmech",cat:"zei",side:"e",fill:1,name:"Taktisches Zeichen: feindliche Panzergrenadiere",who:"NATO-Symbolik (APP-6)",
+  m:["Raute = feindliche Kräfte","Kreuz plus Ellipse = mechanisierte Infanterie"],
+  h:"Kreuz allein = Infanterie. Mit Ellipse = auf Kettenfahrzeugen.",
+  d:()=>app6("h","mech")},
+ {id:"kreuz",cat:"zei",side:"f",fill:1,name:"Eisernes Kreuz",who:"Bundeswehr",
+  m:["Schwarzes Kreuz mit weißem Rand","Arme werden nach außen breiter"],
+  h:"Hoheitszeichen der Bundeswehr auf Fahrzeugen und Luftfahrzeugen.",
+  d:()=>kreuz()},
+ {id:"vs17",cat:"zei",side:"f",fill:1,name:"Signaltafel VS-17",who:"USA und NATO-Partner",
+  m:["Leuchtend orange oder pink","Liegt oben auf dem Fahrzeug","Für Erkennung aus der Luft"],
+  h:"Signal an eigene Luftfahrzeuge: hier stehen eigene Kräfte.",
+  d:()=>vs17()},
+ {id:"zmark",cat:"zei",side:"e",fill:1,name:"Z-Markierung",who:"Russische Streitkräfte, seit 2022",
+  m:["Weißes Z, oft groß auf Seite und Heck","Teils im Rahmen oder Dreieck"],
+  h:"Seit dem Angriff auf die Ukraine 2022 als Kennzeichen russischer Fahrzeuge belegt.",
+  d:()=>letter("M156 64 H284 L156 156 H284")},
+ {id:"vmark",cat:"zei",side:"e",fill:1,name:"V-Markierung",who:"Russische Streitkräfte, seit 2022",
+  m:["Weißes V auf Seite oder Heck"],
+  h:"Wie das Z ein Kennzeichen russischer Fahrzeuge seit 2022.",
+  d:()=>letter("M164 56 L220 164 L276 56")}
+];
+CARDS.forEach(c=>{c.svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="${c.fill?"xMidYMid slice":"xMidYMid meet"}" aria-hidden="true" focusable="false">${c.d()}</svg>`;});
+
+/* ---------- Ablauf ---------- */
+const $=s=>document.querySelector(s);
+const SIDE={f:"Freund",e:"Feind"};
+const st={deck:[],idx:0,ok:0,bad:0,streak:0,best:0,locked:false,open:false,fehler:new Map(),last:[]};
+let allBest=0;try{allBest=+(localStorage.getItem("fof-best")||0);}catch(e){}
+
+function show(id){["start","game","end","kat"].forEach(s=>{document.getElementById(s).hidden=s!==id;});}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startGame(list){
+  st.last=list.slice();st.deck=shuffle(list.map(c=>Object.assign({},c,{again:false})));
+  st.idx=0;st.ok=0;st.bad=0;st.streak=0;st.best=0;st.locked=false;st.open=false;st.fehler=new Map();
+  $("#sheet").className="sheet";show("game");renderStack();
+}
+function cardHTML(c,n){
+  return `<div class="head"><span>${KAT[c.cat]}</span><span>Karte ${n}</span></div><div class="pic${c.fill?" fill":""}">${c.svg}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
+}
+function setStamps(el,dx){
+  const v=Math.max(0,Math.min(1,dx/90)),w=Math.max(0,Math.min(1,-dx/90));
+  el.querySelector(".stamp.f").style.opacity=v;el.querySelector(".stamp.e").style.opacity=w;
+}
+function renderStack(){
+  const stack=$("#stack");stack.innerHTML="";
+  const cur=st.deck[st.idx],nxt=st.deck[st.idx+1];
+  if(nxt){const u=document.createElement("div");u.className="card under";u.setAttribute("aria-hidden","true");u.innerHTML=cardHTML(nxt,st.idx+2);stack.appendChild(u);}
+  const t=document.createElement("div");t.className="card top";t.innerHTML=cardHTML(cur,st.idx+1);
+  t.style.transition="none";t.style.transform="translateY(14px) scale(.95)";stack.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{t.style.transition="";t.style.transform="";}));
+  bindDrag(t);
+  $("#cnt").textContent=`${st.idx+1} / ${st.deck.length}`;
+  $("#ser").textContent=`Serie ${st.streak}`;
+  $("#bar").style.width=(st.idx/st.deck.length*100)+"%";
+}
+function bindDrag(el){
+  let sx=0,sy=0,dx=0,dy=0,on=false;
+  el.addEventListener("pointerdown",e=>{if(st.locked||st.open)return;on=true;sx=e.clientX;sy=e.clientY;dx=dy=0;el.setPointerCapture(e.pointerId);el.style.transition="none";});
+  el.addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-sx;dy=e.clientY-sy;el.style.transform=`translate(${dx}px,${dy*.3}px) rotate(${dx*.05}deg)`;setStamps(el,dx);});
+  const end=()=>{if(!on)return;on=false;if(Math.abs(dx)>90){commit(dx>0?"f":"e");}else{el.style.transition="";el.style.transform="";setStamps(el,0);}};
+  el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
+}
+function commit(choice){
+  if(st.locked||st.open)return;
+  const el=$("#stack .card.top");if(!el)return;
+  st.locked=true;
+  const dir=choice==="f"?1:-1;
+  setStamps(el,dir*200);
+  el.style.transition="transform .38s ease-in";
+  el.style.transform=`translate(${dir*150}%,-20px) rotate(${dir*22}deg)`;
+  const c=st.deck[st.idx],right=choice===c.side;
+  if(right){st.ok++;st.streak++;st.best=Math.max(st.best,st.streak);}
+  else{
+    st.bad++;st.streak=0;st.fehler.set(c.id,c);
+    if(!c.again)st.deck.splice(Math.min(st.deck.length,st.idx+4),0,Object.assign({},c,{again:true}));
+  }
+  $("#ser").textContent=`Serie ${st.streak}`;
+  setTimeout(()=>showSheet(c,right),260);
+}
+function showSheet(c,right){
+  const sh=$("#sheet");
+  sh.className="sheet "+c.side;
+  $("#sheetIn").innerHTML=
+    `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
+    `<h2>${c.name}</h2>`+
+    `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>${c.who}</p>`+
+    `<ul>${c.m.map(x=>`<li>${x}</li>`).join("")}</ul>`+
+    (c.h?`<p class="hint">${c.h}</p>`:"")+
+    `<button class="btn p" id="next">Weiter</button>`;
+  requestAnimationFrame(()=>sh.classList.add("open"));
+  st.open=true;
+  $("#next").addEventListener("click",next);
+  setTimeout(()=>{const b=$("#next");if(b)b.focus({preventScroll:true});},320);
+}
+function next(){
+  if(!st.open)return;
+  $("#sheet").classList.remove("open");
+  st.open=false;st.locked=false;st.idx++;
+  if(st.idx>=st.deck.length)finish();else renderStack();
+}
+function finish(){
+  if(st.best>allBest){allBest=st.best;try{localStorage.setItem("fof-best",String(allBest));}catch(e){}}
+  const total=st.ok+st.bad,q=total?Math.round(st.ok/total*100):0;
+  const errs=[...st.fehler.values()];
+  $("#endIn").innerHTML=
+    `<h1>Auswertung</h1>`+
+    `<p class="big">${q} %</p>`+
+    `<div class="stats"><span>${st.ok} richtig</span><span>${st.bad} falsch</span><span>Beste Serie ${st.best}</span><span>Rekord-Serie ${allBest}</span></div>`+
+    (errs.length?`<h2 class="cond" style="font-size:1.5rem;margin:0 0 6px">Diese Karten üben</h2><ul class="errs">${errs.map(c=>`<li><span class="badge ${c.side}">${SIDE[c.side]}</span>${c.name}</li>`).join("")}</ul>`:`<p class="lead">Keine Fehler in dieser Runde.</p>`)+
+    `<div class="actions">`+
+    (errs.length?`<button class="btn p" id="again">Fehler üben</button>`:"")+
+    `<button class="btn ${errs.length?"g":"p"}" id="repeat">Neue Runde</button>`+
+    `<button class="btn g" id="home">Zur Startseite</button></div>`;
+  show("end");
+  if(errs.length)$("#again").addEventListener("click",()=>startGame(errs));
+  $("#repeat").addEventListener("click",()=>startGame(st.last));
+  $("#home").addEventListener("click",()=>show("start"));
+}
+
+/* Start und Katalog */
+function selected(){return [...document.querySelectorAll("#cats input:checked")].map(i=>i.value);}
+function updateStart(){
+  Object.keys(KAT).forEach(k=>{document.querySelector(`[data-n="${k}"]`).textContent=`(${CARDS.filter(c=>c.cat===k).length} Karten)`;});
+  $("#go").disabled=selected().length===0;
+}
+function buildFan(){
+  const pick=["t72b3","flecktarn","leo2a6"].map(id=>CARDS.find(c=>c.id===id));
+  $("#fan").innerHTML=pick.map((c,i)=>`<div class="mini">${c.svg}${i===2?`<div class="stamp f">FREUND</div>`:""}</div>`).join("");
+}
+function buildKat(){
+  let s="";
+  Object.keys(KAT).forEach(k=>{
+    const list=CARDS.filter(c=>c.cat===k);
+    s+=`<h2>${KATP[k]}</h2><div class="kgrid">`+list.map(c=>
+      `<article class="kitem"><div class="pic${c.fill?" fill":""}">${c.svg}</div><div class="txt"><h3>${c.name}</h3><p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>${c.who}</p><ul>${c.m.map(x=>`<li>${x}</li>`).join("")}</ul>${c.h?`<p class="hint">${c.h}</p>`:""}</div></article>`).join("")+`</div>`;
+  });
+  $("#katIn").innerHTML=s;
+}
+
+document.querySelectorAll("#cats input").forEach(i=>i.addEventListener("change",updateStart));
+$("#go").addEventListener("click",()=>{const cats=selected();startGame(CARDS.filter(c=>cats.includes(c.cat)));});
+$("#openKat").addEventListener("click",()=>{show("kat");document.getElementById("kat").scrollTop=0;});
+$("#katBack").addEventListener("click",()=>show("start"));
+$("#quit").addEventListener("click",()=>{$("#sheet").className="sheet";st.open=false;st.locked=false;show("start");});
+$("#bF").addEventListener("click",()=>commit("f"));
+$("#bE").addEventListener("click",()=>commit("e"));
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("game").hidden)return;
+  if(st.open&&(e.key==="Enter"||e.key===" ")){e.preventDefault();next();return;}
+  if(e.key==="ArrowRight"){e.preventDefault();commit("f");}
+  if(e.key==="ArrowLeft"){e.preventDefault();commit("e");}
+});
+
+updateStart();buildFan();buildKat();
+})();
+</script>
+</body>
+</html>

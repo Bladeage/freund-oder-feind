@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+# Übergabe-Archiv aus Claude Web, Inhalt ist entpackt im Repo
+freund-oder-feind-projekt.zip
