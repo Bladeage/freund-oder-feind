@@ -142,6 +142,67 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
 .warn{font-weight:600}
 .sheet h2 small{font-size:1.1rem;color:var(--cardink2);font-weight:600}
 
+/* Responsiv: Karte richtet sich nach dem Foto (3:2), begrenzt durch Breite UND Höhe des Bildschirms.
+   Fotos werden nie beschnitten (contain), damit kein Merkmal aus dem Bild fällt. */
+html,body,.screen{height:100%;height:100dvh}
+.game{--cw:max(220px,min(calc(100vw - 32px),620px,calc((100dvh - 300px) * 1.5)))}
+.stage{padding:12px 16px}
+.stack{display:grid;width:var(--cw);height:auto}
+.stack .card{position:relative;inset:auto;grid-area:1/1;grid-template-rows:auto auto auto;align-self:center}
+.card .pic.photo{aspect-ratio:3/2;min-height:0;margin:8px 10px}
+.foot{font-size:clamp(1.15rem,4.5vw,1.5rem);padding:0 14px 12px}
+.stamp{font-size:clamp(1.4rem,6vw,2.1rem);top:22px}
+.choice .o{touch-action:manipulation}
+/* Auflösung: Foto bleibt sichtbar, Weiter immer erreichbar */
+.sheet{max-height:88%;padding-bottom:0}
+.sheet .sgrid{display:grid;gap:4px 18px}
+.sheet .spic{border-radius:8px;overflow:hidden;background:#1a1c15;aspect-ratio:3/2;margin:6px 0 10px}
+.sheet .spic img{width:100%;height:100%;object-fit:contain;display:block}
+.sheet .snext{position:sticky;bottom:0;background:var(--card);padding:10px 0 calc(16px + env(safe-area-inset-bottom,0px));margin-top:4px}
+.sheet .snext .btn{width:100%}
+@media (min-width:700px){
+  .sheet .inner{max-width:900px}
+  .sheet .sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}
+  .sheet .spic{position:sticky;top:0}
+  .sheet .snext .btn{width:auto}
+}
+/* Querformat Handy: Knöpfe links/rechts neben der Karte, Auflösung zweispaltig über volle Höhe */
+@media (orientation:landscape) and (max-height:560px){
+  .game{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto minmax(0,1fr) auto;
+    grid-template-areas:"top top top" "prog prog prog" "e stage f" "keys keys keys";
+    --cw:min(calc((100dvh - 120px) * 1.5),calc(100vw - 280px),620px)}
+  .top{grid-area:top;padding:6px 16px 4px}
+  .prog{grid-area:prog}
+  .stage{grid-area:stage;padding:8px 0}
+  .controls{display:contents}
+  #bE{grid-area:e;justify-self:end;align-self:center;margin-right:22px}
+  #bF{grid-area:f;justify-self:start;align-self:center;margin-left:22px}
+  .keys{grid-area:keys;padding-bottom:4px}
+  .foot{display:none}
+  .card .pic.photo{margin:6px 8px 8px}
+  .head{padding:8px 12px 0;font-size:.9rem}
+  .sheet{max-height:100%;border-radius:0;border-top-width:6px;padding-top:10px}
+  .sheet .inner{max-width:none}
+  .sheet .sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
+  .sheet .spic{position:sticky;top:0}
+  .sheet h2{font-size:1.6rem}
+  .fan{display:none}
+  .wrap{padding-top:16px}
+}
+.scroll{overflow-x:hidden}
+@media (max-width:420px){
+  .fan{height:150px;margin-bottom:18px}
+  .mini{width:150px;height:105px;margin-left:-75px}
+  .mini:nth-child(1){transform:translateX(-62px) rotate(-11deg)}
+  .mini:nth-child(2){transform:translateX(62px) rotate(10deg)}
+  .mini .stamp{font-size:1rem}
+}
+@media (max-width:360px){
+  .controls{gap:28px}
+  .sheet{padding-left:14px;padding-right:14px}
+  .sheet h2{font-size:1.7rem}
+}
+
 </style>
 </head>
 <body>
@@ -241,8 +302,10 @@ function startGame(list){
 function cardHTML(c,n){
   return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"} · ${STUFE[c.a.stufe]||""}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a)}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
 }
+/* Wischschwelle: ein Viertel der Kartenbreite, höchstens 90 px. */
+const schwelle=el=>Math.min(90,el.offsetWidth*.25);
 function setStamps(el,dx){
-  const v=Math.max(0,Math.min(1,dx/90)),w=Math.max(0,Math.min(1,-dx/90));
+  const t=schwelle(el),v=Math.max(0,Math.min(1,dx/t)),w=Math.max(0,Math.min(1,-dx/t));
   el.querySelector(".stamp.f").style.opacity=v;el.querySelector(".stamp.e").style.opacity=w;
 }
 function renderStack(){
@@ -261,7 +324,7 @@ function bindDrag(el){
   let sx=0,sy=0,dx=0,dy=0,on=false;
   el.addEventListener("pointerdown",e=>{if(st.locked||st.open)return;on=true;sx=e.clientX;sy=e.clientY;dx=dy=0;el.setPointerCapture(e.pointerId);el.style.transition="none";});
   el.addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-sx;dy=e.clientY-sy;el.style.transform=`translate(${dx}px,${dy*.3}px) rotate(${dx*.05}deg)`;setStamps(el,dx);});
-  const end=()=>{if(!on)return;on=false;if(Math.abs(dx)>90){commit(dx>0?"f":"e");}else{el.style.transition="";el.style.transform="";setStamps(el,0);}};
+  const end=()=>{if(!on)return;on=false;if(Math.abs(dx)>schwelle(el)){commit(dx>0?"f":"e");}else{el.style.transition="";el.style.transform="";setStamps(el,0);}};
   el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
 }
 function commit(choice){
@@ -285,6 +348,7 @@ function showSheet(c,right){
   const sh=$("#sheet");
   sh.className="sheet "+c.side;
   $("#sheetIn").innerHTML=
+    `<div class="sgrid"><div class="spic">${img(c.a)}</div><div class="stxt">`+
     `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
     `<h2>${esc(c.name)}${c.a.untervariante?` <small>${esc(c.a.untervariante)}</small>`:""}</h2>`+
     `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>Auf diesem Bild: ${esc(c.a.nutzerstaat)}</p>`+
@@ -292,8 +356,8 @@ function showSheet(c,right){
     `<ul>${c.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
     (c.h?`<p class="hint">${esc(c.h)}</p>`:"")+
     `<p class="credit">${credit(c.a)}</p>`+
-    `<button class="btn p" id="next">Weiter</button>`;
-  requestAnimationFrame(()=>sh.classList.add("open"));
+    `</div></div><div class="snext"><button class="btn p" id="next">Weiter</button></div>`;
+  void sh.offsetHeight;sh.classList.add("open"); /* Reflow erzwingen, damit die Einblend-Animation startet */
   st.open=true;
   $("#next").addEventListener("click",next);
   setTimeout(()=>{const b=$("#next");if(b)b.focus({preventScroll:true});},320);
