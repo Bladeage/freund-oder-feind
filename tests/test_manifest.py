@@ -10,6 +10,9 @@ MANIFEST = ROOT / "assets/manifest.json"
 def gueltig(tmp_path: Path) -> dict:
     (tmp_path / "assets").mkdir()
     (tmp_path / "assets/leo-seite-01.jpg").write_bytes(b"x")
+    (tmp_path / "assets/web").mkdir()
+    for b in (480, 960):
+        (tmp_path / f"assets/web/leo-seite-01-{b}.webp").write_bytes(b"x")
     return {
         "id": "leo-seite-01",
         "fahrzeug": "Leopard 2A6",
@@ -88,3 +91,16 @@ def test_freie_lizenzen(lizenz):
 @pytest.mark.parametrize("lizenz", ["CC BY-NC 4.0", "CC BY-ND 4.0", "Attribution", "PD-RU-exempt"])
 def test_unfreie_oder_unscharfe_lizenzen(lizenz):
     assert not FREI.match(lizenz)
+
+
+def test_webp_variante_fehlt(tmp_path):
+    e = gueltig(tmp_path)
+    (tmp_path / "assets/web/leo-seite-01-960.webp").unlink()
+    assert any("WebP-Variante 960" in f for f in pruefe([e], root=tmp_path))
+
+
+def test_bilder_web_breiten_passen_zum_validator():
+    import bilder_web
+    from validate_manifest import WEB_BREITEN
+
+    assert bilder_web.BREITEN == WEB_BREITEN

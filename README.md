@@ -18,6 +18,7 @@ Mit `?unklar=1` werden auch Assets mit `lizenz_status: unklar` gezeigt (privater
 ```sh
 python3 tool/commons_fetch.py tool/pilot.json           # Dry-Run: Lizenz/Urheber anzeigen
 python3 tool/commons_fetch.py tool/pilot.json --apply   # laden, Manifest schreiben
+uv run python tool/bilder_web.py                        # WebP 480/960 px für die App (Pflicht, prüft die CI)
 ```
 
 Nur Standardbibliothek. Lizenz und Urheber kommen aus der Commons-API, nicht aus der Spec.
@@ -46,6 +47,8 @@ nach `docs/pruefberichte/`, kritische und hohe Befunde werden vor dem Merge beho
 | `assets/fahrzeuge/` | Fotos, 1280 px breit |
 | `tool/commons_fetch.py` | Download + Metadaten von Wikimedia Commons |
 | `tool/pilot.json` | Auswahl der Pilot-Fotos plus redaktionelle Felder (Ansicht, Stufe, Ort …) |
+| `tool/bilder_web.py` | WebP-Varianten (480/960 px) aus den JPGs, `assets/web/` |
+| `tool/grafiken.py` | Favicon, Homescreen-Icon, Teilen-Vorschau (ohne Fahrzeugfoto wegen Namensnennung) |
 | `tool/validate_manifest.py` | Schema-, Datei- und Lizenzprüfung des Manifests |
 | `docs/pruefberichte/` | Berichte der Prüf-Agenten mit Umsetzungsstand |
 | `docs/handover-2026-10-27.md` | Ziel, Entscheidungen, Quellen, Plan, offene Fragen |
