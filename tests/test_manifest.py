@@ -13,6 +13,7 @@ def gueltig(tmp_path: Path) -> dict:
     return {
         "id": "leo-seite-01",
         "fahrzeug": "Leopard 2A6",
+        "untervariante": "",
         "kategorie": "fahrzeug",
         "seite": "freund",
         "ansicht": "seite",
@@ -23,7 +24,9 @@ def gueltig(tmp_path: Path) -> dict:
         "lizenz": "CC BY 2.0",
         "lizenz_status": "geprueft",
         "aufnahme_datum": "2018-06-08",
+        "aufnahme_ort": "",
         "kontext": "uebung",
+        "stufe": "leicht",
         "spiegeln_erlaubt": False,
         "waermemaske": "",
         "variante_gesichert": False,
@@ -45,6 +48,7 @@ def test_gueltiger_eintrag(tmp_path):
     [
         ("seite", "partner", "seite="),
         ("kontext", "kino", "kontext="),
+        ("stufe", "extrem", "stufe="),
         ("spiegeln_erlaubt", "nein", "true/false"),
         ("datei", "assets/fehlt.jpg", "Datei fehlt"),
         ("urheber", " ", "urheber leer"),
@@ -72,7 +76,9 @@ def test_release_verlangt_bericht_und_geprueft(tmp_path):
     assert any("muss geprueft sein" in f for f in fehler)
 
 
-@pytest.mark.parametrize("lizenz", ["CC BY 2.0", "CC BY-SA 4.0", "CC0", "Public domain"])
+@pytest.mark.parametrize(
+    "lizenz", ["CC BY 2.0", "CC BY-SA 4.0", "CC BY-SA 3.0 de", "CC0", "Public domain"]
+)
 def test_freie_lizenzen(lizenz):
     assert FREI.match(lizenz)
 
