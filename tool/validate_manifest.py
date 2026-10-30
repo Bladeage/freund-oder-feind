@@ -30,6 +30,7 @@ WERTE = {
     "stufe": {"leicht", "mittel", "schwer"},
 }
 BOOL = ("spiegeln_erlaubt", "variante_gesichert")
+WEB_BREITEN = (480, 960)  # muss zu tool/bilder_web.py passen
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 DATUM = re.compile(r"^(\d{4}(-\d{2}(-\d{2})?)?)?$")
 # Lizenzen, die ohne Einzelfallprüfung weitergegeben werden dürfen.
@@ -76,6 +77,10 @@ def pruefe(eintraege: list[dict], root: Path = ROOT, release: bool = False) -> l
 
         if e.get("lizenz_status") == "geprueft" and not FREI.match(str(e.get("lizenz", ""))):
             f(f"lizenz {e.get('lizenz')!r} ist nicht frei, lizenz_status muss unklar sein")
+        if e.get("typ") == "bild" and e.get("id"):
+            for b in WEB_BREITEN:
+                if not (root / f"assets/web/{e['id']}-{b}.webp").is_file():
+                    f(f"WebP-Variante {b} px fehlt (tool/bilder_web.py laufen lassen)")
         for k in ("waermemaske", "pruefbericht"):
             if e.get(k) and not (root / e[k]).is_file():
                 f(f"{k} verweist auf fehlende Datei: {e[k]}")

@@ -4,6 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Freund oder Feind</title>
+<meta name="description" content="Lern-App zur Freund-Feind-Erkennung mit echten Fotos: wischen, auflösen, Merkmale lernen.">
+<meta name="theme-color" content="#2f3326">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="Freund oder Feind">
+<meta property="og:description" content="Echte Fotos. Wischen. Merkmale lernen.">
+<meta property="og:url" content="https://bladeage.github.io/freund-oder-feind/">
+<meta property="og:image" content="https://bladeage.github.io/freund-oder-feind/app/vorschau.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#c9c8b4; --bar:#b6b5a0; --ink:#23261c; --ink2:#4b4e3f; --line:#9a9983;
@@ -158,6 +171,12 @@ html,body,.screen{height:100%;height:100dvh}
 .sheet .sgrid{display:grid;gap:4px 18px}
 .sheet .spic{border-radius:8px;overflow:hidden;background:#1a1c15;aspect-ratio:3/2;margin:6px 0 10px}
 .sheet .spic img{width:100%;height:100%;object-fit:contain;display:block}
+.sheet .spic{position:relative;display:block;width:100%;padding:0;border:0;cursor:zoom-in}
+.zbadge{position:absolute;right:8px;bottom:8px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:rgba(236,235,226,.9);color:#23261c;font-size:1.1rem;line-height:1}
+.zoom{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.zoom img{max-width:100%;max-height:100%;transform-origin:0 0;transition:transform .2s ease;touch-action:none;user-select:none;-webkit-user-select:none;cursor:zoom-in}
+.zclose{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:48px;height:48px;border:0;border-radius:50%;background:rgba(236,235,226,.92);color:#23261c;font-size:1.4rem;cursor:pointer}
+.zhint{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin:0;text-align:center;color:#ddd;font-size:.85rem;pointer-events:none}
 .sheet .snext{position:sticky;bottom:0;background:var(--card);padding:10px 0 calc(16px + env(safe-area-inset-bottom,0px));margin-top:4px}
 .sheet .snext .btn{width:100%}
 @media (min-width:700px){
@@ -241,6 +260,7 @@ html,body,.screen{height:100%;height:100dvh}
   </div>
   <div class="keys">Tastatur: Pfeil links für Feind, Pfeil rechts für Freund, Enter für Weiter</div>
   <div class="sheet" id="sheet" role="dialog" aria-live="polite" aria-label="Auflösung"><div class="inner" id="sheetIn"></div></div>
+  <div class="zoom" id="zoom" role="dialog" aria-label="Foto vergrößert" hidden><img id="zoomImg" alt="" draggable="false"><button class="zclose" id="zoomClose" aria-label="Schließen">✕</button><p class="zhint">Antippen zum Vergrößern, ziehen zum Verschieben</p></div>
 </section>
 
 <!-- Ende -->
@@ -284,7 +304,8 @@ const ASSETS=(window.MANIFEST||[]).filter(a=>a.typ==="bild"&&FZ[a.fahrzeug]&&(mi
 const CARDS=ASSETS.map(a=>Object.assign({},FZ[a.fahrzeug],{id:a.id,name:a.fahrzeug,side:SEITE[a.seite],a:a}));
 
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const img=a=>`<img src="../${esc(a.datei)}" alt="" draggable="false" loading="lazy">`;
+const GR={karte:"(min-width:700px) 620px, 92vw",sheet:"(min-width:700px) 45vw, 92vw",mini:"200px",kat:"(min-width:600px) 33vw, 92vw"};
+const img=(a,g)=>`<img src="../${esc(a.datei)}" srcset="../assets/web/${esc(a.id)}-480.webp 480w, ../assets/web/${esc(a.id)}-960.webp 960w" sizes="${GR[g]}" alt="" draggable="false" loading="lazy">`;
 const credit=a=>`Foto: ${esc(a.namensnennung||a.urheber||"unbekannt")}, <a href="${esc(a.lizenz_url||a.quelle_url)}" target="_blank" rel="noopener">${esc(a.lizenz)}</a>, <a href="${esc(a.quelle_url)}" target="_blank" rel="noopener">Quelle</a>`;
 
 const $=s=>document.querySelector(s);
@@ -300,7 +321,7 @@ function startGame(list){
   $("#sheet").className="sheet";show("game");renderStack();
 }
 function cardHTML(c,n){
-  return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"} · ${STUFE[c.a.stufe]||""}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a)}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
+  return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"} · ${STUFE[c.a.stufe]||""}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a,"karte")}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
 }
 /* Wischschwelle: ein Viertel der Kartenbreite, höchstens 90 px. */
 const schwelle=el=>Math.min(90,el.offsetWidth*.25);
@@ -348,7 +369,7 @@ function showSheet(c,right){
   const sh=$("#sheet");
   sh.className="sheet "+c.side;
   $("#sheetIn").innerHTML=
-    `<div class="sgrid"><div class="spic">${img(c.a)}</div><div class="stxt">`+
+    `<div class="sgrid"><button class="spic" id="spic" aria-label="Foto vergrößern">${img(c.a,"sheet")}<span class="zbadge" aria-hidden="true">⤢</span></button><div class="stxt">`+
     `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
     `<h2>${esc(c.name)}${c.a.untervariante?` <small>${esc(c.a.untervariante)}</small>`:""}</h2>`+
     `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>Auf diesem Bild: ${esc(c.a.nutzerstaat)}</p>`+
@@ -360,6 +381,7 @@ function showSheet(c,right){
   void sh.offsetHeight;sh.classList.add("open"); /* Reflow erzwingen, damit die Einblend-Animation startet */
   st.open=true;
   $("#next").addEventListener("click",next);
+  $("#spic").addEventListener("click",()=>zoomAuf(c.a));
   setTimeout(()=>{const b=$("#next");if(b)b.focus({preventScroll:true});},320);
 }
 function next(){
@@ -390,13 +412,13 @@ function finish(){
 /* Start und Katalog */
 function buildFan(){
   const pick=["T-72B3","PT-91 Twardy","Leopard 2A6"].map(n=>CARDS.find(c=>c.name===n)).filter(Boolean);
-  $("#fan").innerHTML=pick.map((c,i)=>`<div class="mini">${img(c.a)}${i===2?`<div class="stamp f">FREUND</div>`:""}</div>`).join("");
+  $("#fan").innerHTML=pick.map((c,i)=>`<div class="mini">${img(c.a,"mini")}${i===2?`<div class="stamp f">FREUND</div>`:""}</div>`).join("");
 }
 function buildKat(){
   $("#katIn").innerHTML=`<h2>Fahrzeuge</h2>`+Object.keys(FZ).map(n=>{
     const f=FZ[n],list=CARDS.filter(c=>c.name===n);
     return `<h3 class="kh">${esc(n)} <span class="badge ${f.side}">${SIDE[f.side]}</span></h3><p class="who">${esc(f.who)}</p><ul>${f.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
-      `<div class="kgrid">${list.map(c=>`<article class="kitem"><div class="pic photo">${img(c.a)}</div><div class="txt"><p class="credit">${credit(c.a)}</p></div></article>`).join("")}</div>`;
+      `<div class="kgrid">${list.map(c=>`<article class="kitem"><div class="pic photo">${img(c.a,"kat")}</div><div class="txt"><p class="credit">${credit(c.a)}</p></div></article>`).join("")}</div>`;
   }).join("");
 }
 
@@ -408,7 +430,30 @@ $("#katBack").addEventListener("click",()=>show("start"));
 $("#quit").addEventListener("click",()=>{$("#sheet").className="sheet";st.open=false;st.locked=false;show("start");});
 $("#bF").addEventListener("click",()=>commit("f"));
 $("#bE").addEventListener("click",()=>commit("e"));
+/* Vollbild-Zoom: Originalfoto, Antippen vergrößert an der Stelle (2,5x), Ziehen verschiebt. */
+const zm={s:1,x:0,y:0};
+function zoomSetzen(s,x,y){
+  const im=$("#zoomImg"),w=im.offsetWidth,h=im.offsetHeight;
+  zm.s=s;zm.x=s===1?0:Math.min(0,Math.max(w-w*s,x));zm.y=s===1?0:Math.min(0,Math.max(h-h*s,y));
+  im.style.transform=`translate(${zm.x}px,${zm.y}px) scale(${zm.s})`;
+}
+function zoomAuf(a){
+  const z=$("#zoom"),im=$("#zoomImg");im.src="../"+a.datei;z.hidden=false;zoomSetzen(1,0,0);$("#zoomClose").focus({preventScroll:true});
+}
+function zoomZu(){$("#zoom").hidden=true;const b=$("#spic");if(b)b.focus({preventScroll:true});}
+(function(){
+  const im=$("#zoomImg");let sx=0,sy=0,ox=0,oy=0,on=false,weg=0;
+  im.addEventListener("pointerdown",e=>{on=true;weg=0;sx=e.clientX;sy=e.clientY;ox=zm.x;oy=zm.y;im.setPointerCapture(e.pointerId);im.style.transition="none";});
+  im.addEventListener("pointermove",e=>{if(!on)return;const dx=e.clientX-sx,dy=e.clientY-sy;weg=Math.max(weg,Math.abs(dx)+Math.abs(dy));if(zm.s>1)zoomSetzen(zm.s,ox+dx,oy+dy);});
+  im.addEventListener("pointerup",e=>{if(!on)return;on=false;im.style.transition="";
+    if(weg<8){const r=im.getBoundingClientRect(),px=(e.clientX-r.left)/zm.s,py=(e.clientY-r.top)/zm.s;
+      if(zm.s===1)zoomSetzen(2.5,px*(1-2.5),py*(1-2.5));else zoomSetzen(1,0,0);}});
+  im.addEventListener("pointercancel",()=>{on=false;im.style.transition="";});
+  $("#zoomClose").addEventListener("click",zoomZu);
+})();
+
 document.addEventListener("keydown",e=>{
+  if(!$("#zoom").hidden){if(e.key==="Escape"||e.key==="Enter"){e.preventDefault();zoomZu();}return;}
   if(document.getElementById("game").hidden)return;
   if(st.open&&(e.key==="Enter"||e.key===" ")){e.preventDefault();next();return;}
   if(e.key==="ArrowRight"){e.preventDefault();commit("f");}
