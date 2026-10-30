@@ -14,7 +14,7 @@ Prüfe für jede übergebene Karte:
 
 1. **Merkmale:** Jede Aussage einzeln. Beispiele: Anzahl der Laufrollen, Anzahl der Stützrollen, Turmform, Kaliber, Reaktivpanzerung. Stimmt sie für genau diese Variante?
 2. **Nutzerstaaten:** Stimmen die genannten Staaten heute? Gibt es wichtige Nutzer auf der anderen Seite? Dann braucht die Karte einen Hinweis „auch von der Gegenseite genutzt“.
-3. **Zuordnung:** Freund = NATO-Staaten, Feind = Russland und Belarus. Passt die Seite?
+3. **Zuordnung:** Freund = NATO-Staaten und die Ukraine, Feind = Russland und Belarus. Passt die Seite?
 4. **Lernwert:** Ist das Merkmal auf einem Foto überhaupt sichtbar? Merkmale, die man von außen nicht sieht (zum Beispiel ein Ladeautomat), als „nicht sichtbar“ kennzeichnen.
 
 ## Regeln

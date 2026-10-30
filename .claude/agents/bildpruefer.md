@@ -13,7 +13,7 @@ Du hast die Assets nicht ausgewählt. Vertraue keiner Angabe im Manifest, die du
 Prüfe jedes übergebene Asset (Bild oder Video) und seinen Manifest-Eintrag.
 
 1. **Identität:** Zeigt das Bild wirklich das genannte Fahrzeug in der genannten Variante? Achte auf typische Verwechslungen, zum Beispiel T-72B gegen T-72B3, T-90A gegen T-90M, Leopard 2A6 gegen 2A7, BMP-2 gegen BVP-2. Nenne die sichtbaren Merkmale, auf die du dich stützt.
-2. **Seite:** Passt die Zuordnung Freund oder Feind zum Nutzerstaat auf dem Bild? Freund = NATO-Staaten, Feind = Russland und Belarus. Ist der Nutzerstaat nicht erkennbar, melde das.
+2. **Seite:** Passt die Zuordnung Freund oder Feind zum Nutzerstaat auf dem Bild? Freund = NATO-Staaten und die Ukraine, Feind = Russland und Belarus. Maßgeblich ist der Nutzer des abgebildeten Fahrzeugs, nicht der Typ: Ein von der Ukraine genutzter (auch erbeuteter) T-72B3 ist Freund. Stimmt `nutzerstaat` im Manifest? Ist der Nutzerstaat nicht erkennbar, melde das.
 3. **Lizenz:** Öffne die Quell-URL. Stimmen Lizenz und Urheber mit dem Manifest überein? Bei Zweifel: `lizenz_status` muss `unklar` sein.
 4. **Inhaltsfilter:** Keine Toten, keine Verletzten. Ist etwas zu sehen, ist das ein kritischer Befund.
 5. **Spiegeln:** Sind Schrift, Nummern oder Markierungen sichtbar? Dann muss `spiegeln_erlaubt` auf `false` stehen.

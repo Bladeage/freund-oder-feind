@@ -153,7 +153,7 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
     <h1>Freund oder Feind</h1>
     <p class="lead">Du siehst ein echtes Foto. Wische nach rechts für Freund, nach links für Feind. Danach zeigt die App die Merkmale, an denen du es erkennst.</p>
     <div class="sides">
-      <div class="side"><span class="sw f"></span>Freund: NATO-Staaten</div>
+      <div class="side"><span class="sw f"></span>Freund: NATO-Staaten und Ukraine</div>
       <div class="side"><span class="sw e"></span>Feind: Russland und Belarus</div>
     </div>
     <div class="actions">
@@ -162,7 +162,7 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
     </div>
     <p class="note" id="info"></p>
     <p class="note">Freund und Feind folgen hier der Übungslogik. In der Realität fahren beide Seiten oft dieselben Fahrzeugtypen. Typ allein ist kein sicheres Merkmal.</p>
-    <p class="note warn">Pilot-Stand: Bilder und Merkmalstexte sind unabhängig geprüft (Prüfberichte im Repo). Wie ukrainisch genutzte Fahrzeuge gewertet werden, ist noch offen.</p>
+    <p class="note warn">Pilot-Stand: Bilder und Merkmalstexte sind unabhängig geprüft (Prüfberichte im Repo). Entscheidend ist, wer das Fahrzeug auf dem Bild nutzt, nicht der Typ.</p>
   </div>
 </section>
 
@@ -219,7 +219,8 @@ const STUFE={leicht:"Leicht",mittel:"Mittel",schwer:"Schwer"};
 /* Unklar lizenzierte Assets nur mit ?unklar=1 (privater Build, Handover Abschnitt 4). */
 const mitUnklar=new URLSearchParams(location.search).get("unklar")==="1";
 const ASSETS=(window.MANIFEST||[]).filter(a=>a.typ==="bild"&&FZ[a.fahrzeug]&&(mitUnklar||a.lizenz_status==="geprueft"));
-const CARDS=ASSETS.map(a=>Object.assign({id:a.id,name:a.fahrzeug,side:SEITE[a.seite],a:a},FZ[a.fahrzeug]));
+/* Freund/Feind entscheidet der Nutzer auf dem Bild (Asset), nicht der Typ: ein ukrainischer T-72B3 ist Freund. */
+const CARDS=ASSETS.map(a=>Object.assign({},FZ[a.fahrzeug],{id:a.id,name:a.fahrzeug,side:SEITE[a.seite],a:a}));
 
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const img=a=>`<img src="../${esc(a.datei)}" alt="" draggable="false" loading="lazy">`;
@@ -286,7 +287,8 @@ function showSheet(c,right){
   $("#sheetIn").innerHTML=
     `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
     `<h2>${esc(c.name)}${c.a.untervariante?` <small>${esc(c.a.untervariante)}</small>`:""}</h2>`+
-    `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>${esc(c.who)}</p>`+
+    `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>Auf diesem Bild: ${esc(c.a.nutzerstaat)}</p>`+
+    `<p class="who">Nutzer des Typs: ${esc(c.who)}</p>`+
     `<ul>${c.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
     (c.h?`<p class="hint">${esc(c.h)}</p>`:"")+
     `<p class="credit">${credit(c.a)}</p>`+
