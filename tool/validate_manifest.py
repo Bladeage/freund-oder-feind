@@ -16,8 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 PFLICHT = [
-    "id", "fahrzeug", "untervariante", "kategorie", "seite", "ansicht", "typ", "datei",
-    "quelle_url", "urheber", "lizenz", "lizenz_status", "aufnahme_datum", "aufnahme_ort",
+    "id", "fahrzeug", "untervariante", "kategorie", "seite", "nutzerstaat", "ansicht", "typ",
+    "datei", "quelle_url", "urheber", "lizenz", "lizenz_status", "aufnahme_datum", "aufnahme_ort",
     "kontext", "stufe", "spiegeln_erlaubt", "waermemaske", "variante_gesichert", "pruefbericht",
 ]  # fmt: skip
 WERTE = {
@@ -69,6 +69,8 @@ def pruefe(eintraege: list[dict], root: Path = ROOT, release: bool = False) -> l
             f("quelle_url fehlt oder ist kein https")
         if not str(e.get("urheber", "")).strip():
             f("urheber leer")
+        if not str(e.get("nutzerstaat", "")).strip():
+            f("nutzerstaat leer")
         if not DATUM.match(str(e.get("aufnahme_datum", ""))):
             f("aufnahme_datum nicht im Format JJJJ[-MM[-TT]]")
 
