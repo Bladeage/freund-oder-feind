@@ -20,13 +20,14 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from validate_manifest import FREI
+
 API = "https://commons.wikimedia.org/w/api.php"
 # Wikimedia verlangt einen aussagekräftigen User-Agent mit Kontakt; Kontakt über .env setzbar.
 UA = f"FreundOderFeind/0.1 (Lern-App; {os.environ.get('COMMONS_KONTAKT', 'privat')})"
 BREITE = 1280
 PAUSE = 2.0
 ROOT = Path(__file__).resolve().parent.parent
-FREI = re.compile(r"^(CC0|CC BY(-SA)? [\d.]+|Public domain|PD.*|Attribution)", re.I)
 
 
 def get(url: str, versuche: int = 5) -> bytes:
