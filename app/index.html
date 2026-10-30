@@ -140,6 +140,7 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
 .credit a{color:inherit}
 .kh{font-size:1.5rem;margin:24px 0 4px;display:flex;align-items:center;gap:10px}
 .warn{font-weight:600}
+.sheet h2 small{font-size:1.1rem;color:var(--cardink2);font-weight:600}
 
 </style>
 </head>
@@ -161,7 +162,7 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
     </div>
     <p class="note" id="info"></p>
     <p class="note">Freund und Feind folgen hier der Übungslogik. In der Realität fahren beide Seiten oft dieselben Fahrzeugtypen. Typ allein ist kein sicheres Merkmal.</p>
-    <p class="note warn">Pilot-Stand: Merkmalstexte sind noch nicht vom Fachprüfer belegt.</p>
+    <p class="note warn">Pilot-Stand: Bilder und Merkmalstexte sind unabhängig geprüft (Prüfberichte im Repo). Wie ukrainisch genutzte Fahrzeuge gewertet werden, ist noch offen.</p>
   </div>
 </section>
 
@@ -198,21 +199,22 @@ legend{font-family:"Arial Narrow",Arial,sans-serif;font-weight:600;font-size:1.2
 <script>
 (function(){
 "use strict";
-/* Merkmalstexte aus Demo v0 übernommen, UNGEPRÜFT (Handover Abschnitt 5). */
+/* Merkmalstexte nach Fachprüfung pilot-01 (docs/pruefberichte/fachinhalt-pilot-01.md). */
 const FZ={
- "Leopard 2A6":{side:"f",who:"Deutschland, Kanada (2A6M), Portugal und weitere",
-  m:["7 Laufrollen, oberes Kettentrum von Seitenschürzen verdeckt","Pfeilförmige Zusatzpanzerung an der Turmfront (ab 2A5)","Langes 120-mm-Rohr L55"],
-  h:"Der Keil an der Turmfront trennt 2A5, 2A6 und 2A7 vom älteren 2A4."},
- "T-72B3":{side:"e",who:"Russland; Belarus nutzt T-72B-Varianten",
-  m:["6 große Laufrollen, 3 Stützrollen","Flacher, gerundeter Gussturm","Reaktivpanzerung Kontakt-5 auf Turm und Bug","Seit 2022 oft Schutzgitter über dem Turm"],
-  h:"3 Stützrollen: T-72-Familie. 5 Stützrollen: T-80. Seitenschürzen verdecken die Stützrollen im Einsatz oft. Dann helfen Turmform und Laufrollen."},
- "PT-91 Twardy":{side:"f",who:"Polen",
-  m:["6 große Laufrollen, 3 Stützrollen","Gerundeter Gussturm wie beim T-72","Polnische Reaktivpanzerung ERAWA"],
-  h:"Basis ist der T-72M1. Die Silhouette allein sagt nicht Freund oder Feind. Kennzeichen und Lage entscheiden."}
+ "Leopard 2A6":{side:"f",who:"Deutschland, Finnland, Kanada (2A6M CAN), Portugal. Auch die Ukraine (aus deutschen und portugiesischen Beständen).",
+  m:["7 Laufrollen (ohne Leit- und Antriebsrad), oberes Kettentrum von Seitenschürzen verdeckt","Keilförmige Zusatzpanzerung an der Turmfront (ab 2A5)","Langes Rohr L55, ragt weit über den Bug hinaus","Vorderes Drittel der Seitenschürze als dicke Panzerkästen"],
+  h:"Der Keil an der Turmfront trennt 2A5, 2A6 und 2A7 vom älteren 2A4. Das lange L55-Rohr trennt den 2A6 vom 2A5 (kürzeres L44)."},
+ "T-72B3":{side:"e",who:"Russland, Belarus (T-72B3 Modell 2016). Auch die Ukraine fährt erbeutete Exemplare.",
+  m:["6 große Laufrollen, 3 Stützrollen (oft von Schürzen verdeckt)","Flacher Gussturm, vorn durch keilförmige Kontakt-5-Blöcke kantig","Reaktivpanzerung Kontakt-5 auf Turm und Bug","Hohes, kastenförmiges Visier Sosna-U auf dem Turmdach","Seit Ende 2021 oft Schutzgitter über dem Turm. Auch ukrainische Panzer tragen sie."],
+  h:"3 Stützrollen: T-72-Familie und T-90. 5 Stützrollen: T-80. Seitenschürzen verdecken die Stützrollen im Einsatz oft. Dann helfen Turmform und Laufrollen. Die T-72-Familie fährt auch Polen (PT-91)."},
+ "PT-91 Twardy":{side:"f",who:"Polen. Außerdem Malaysia (PT-91M) und die Ukraine (aus polnischen Beständen).",
+  m:["6 große Laufrollen, 3 Stützrollen (meist von Schürzen verdeckt)","T-72-Gussturm, Front und Seiten mit flachen Kacheln belegt","Polnische Reaktivpanzerung ERAWA: viele flache Kacheln in Reihen"],
+  h:"Basis ist der T-72M1. Flache ERAWA-Kacheln statt Kontakt-5-Keilen unterscheiden ihn vom T-72B3. Die Silhouette allein sagt nicht Freund oder Feind. Kennzeichen und Lage entscheiden."}
 };
 const SEITE={freund:"f",feind:"e"};
 const SIDE={f:"Freund",e:"Feind"};
 const ANSICHT={seite:"Seite",front:"Front",schraeg:"Schräg",gelaende:"Gelände"};
+const STUFE={leicht:"Leicht",mittel:"Mittel",schwer:"Schwer"};
 
 /* Unklar lizenzierte Assets nur mit ?unklar=1 (privater Build, Handover Abschnitt 4). */
 const mitUnklar=new URLSearchParams(location.search).get("unklar")==="1";
@@ -221,7 +223,7 @@ const CARDS=ASSETS.map(a=>Object.assign({id:a.id,name:a.fahrzeug,side:SEITE[a.se
 
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const img=a=>`<img src="../${esc(a.datei)}" alt="" draggable="false" loading="lazy">`;
-const credit=a=>`Foto: ${esc(a.urheber||"unbekannt")}, <a href="${esc(a.lizenz_url||a.quelle_url)}" target="_blank" rel="noopener">${esc(a.lizenz)}</a>, <a href="${esc(a.quelle_url)}" target="_blank" rel="noopener">Quelle</a>`;
+const credit=a=>`Foto: ${esc(a.namensnennung||a.urheber||"unbekannt")}, <a href="${esc(a.lizenz_url||a.quelle_url)}" target="_blank" rel="noopener">${esc(a.lizenz)}</a>, <a href="${esc(a.quelle_url)}" target="_blank" rel="noopener">Quelle</a>`;
 
 const $=s=>document.querySelector(s);
 const st={deck:[],idx:0,ok:0,bad:0,streak:0,best:0,locked:false,open:false,fehler:new Map(),last:[]};
@@ -236,7 +238,7 @@ function startGame(list){
   $("#sheet").className="sheet";show("game");renderStack();
 }
 function cardHTML(c,n){
-  return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a)}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
+  return `<div class="head"><span>${ANSICHT[c.a.ansicht]||"Fahrzeug"} · ${STUFE[c.a.stufe]||""}</span><span>Karte ${n}</span></div><div class="pic photo">${img(c.a)}</div><div class="foot">Freund oder Feind?</div><div class="stamp f">FREUND</div><div class="stamp e">FEIND</div>`;
 }
 function setStamps(el,dx){
   const v=Math.max(0,Math.min(1,dx/90)),w=Math.max(0,Math.min(1,-dx/90));
@@ -263,7 +265,7 @@ function bindDrag(el){
 }
 function commit(choice){
   if(st.locked||st.open)return;
-  const el=$("#stack .card.top");if(!el)return;
+  const el=$("#stack .card.top");if(!el||!st.deck[st.idx])return;
   st.locked=true;
   const dir=choice==="f"?1:-1;
   setStamps(el,dir*200);
@@ -283,7 +285,7 @@ function showSheet(c,right){
   sh.className="sheet "+c.side;
   $("#sheetIn").innerHTML=
     `<p class="verdict ${right?"ok":"no"}">${right?"Richtig.":"Falsch."}</p>`+
-    `<h2>${esc(c.name)}</h2>`+
+    `<h2>${esc(c.name)}${c.a.untervariante?` <small>${esc(c.a.untervariante)}</small>`:""}</h2>`+
     `<p class="who"><span class="badge ${c.side}">${SIDE[c.side]}</span>${esc(c.who)}</p>`+
     `<ul>${c.m.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`+
     (c.h?`<p class="hint">${esc(c.h)}</p>`:"")+

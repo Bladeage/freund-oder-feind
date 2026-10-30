@@ -81,8 +81,9 @@ def eintrag(spec: dict) -> tuple[dict, str]:
             "lizenz": lizenz,
             "lizenz_url": text(meta, "LicenseUrl"),
             "lizenz_status": "geprueft" if FREI.match(lizenz) else "unklar",
-            "aufnahme_datum": text(meta, "DateTimeOriginal")[:10],
-            "pruefbericht": "",
+            # Spec darf das Datum vorgeben: Commons verschiebt DVIDS-Zeitstempel teils um einen Tag.
+            "aufnahme_datum": spec.get("aufnahme_datum") or text(meta, "DateTimeOriginal")[:10],
+            "pruefbericht": spec.get("pruefbericht", ""),
         }
     )
     return e, ii["thumburl"]

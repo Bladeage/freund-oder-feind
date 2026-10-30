@@ -16,9 +16,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 PFLICHT = [
-    "id", "fahrzeug", "kategorie", "seite", "ansicht", "typ", "datei", "quelle_url",
-    "urheber", "lizenz", "lizenz_status", "aufnahme_datum", "kontext", "spiegeln_erlaubt",
-    "waermemaske", "variante_gesichert", "pruefbericht",
+    "id", "fahrzeug", "untervariante", "kategorie", "seite", "ansicht", "typ", "datei",
+    "quelle_url", "urheber", "lizenz", "lizenz_status", "aufnahme_datum", "aufnahme_ort",
+    "kontext", "stufe", "spiegeln_erlaubt", "waermemaske", "variante_gesichert", "pruefbericht",
 ]  # fmt: skip
 WERTE = {
     "kategorie": {"fahrzeug", "tarnmuster", "kennzeichen"},
@@ -26,13 +26,15 @@ WERTE = {
     "ansicht": {"seite", "front", "heck", "schraeg", "oben", "gelaende"},
     "typ": {"bild", "video"},
     "lizenz_status": {"geprueft", "unklar"},
-    "kontext": {"uebung", "einsatz", "konflikt", "parade", "museum"},
+    "kontext": {"uebung", "einsatz", "konflikt", "parade", "vorfuehrung", "museum"},
+    "stufe": {"leicht", "mittel", "schwer"},
 }
 BOOL = ("spiegeln_erlaubt", "variante_gesichert")
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)+$")
 DATUM = re.compile(r"^(\d{4}(-\d{2}(-\d{2})?)?)?$")
 # Lizenzen, die ohne Einzelfallprüfung weitergegeben werden dürfen.
-FREI = re.compile(r"^(CC0( 1\.0)?|CC BY(-SA)? \d\.\d|Public domain)$")
+# Portierte Fassungen (z. B. "CC BY-SA 3.0 de") sind ebenso frei.
+FREI = re.compile(r"^(CC0( 1\.0)?|CC BY(-SA)? \d\.\d( [a-z]{2})?|Public domain)$")
 
 
 def pruefe(eintraege: list[dict], root: Path = ROOT, release: bool = False) -> list[str]:

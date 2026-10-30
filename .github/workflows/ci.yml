@@ -15,4 +15,5 @@ jobs:
       - run: uv run ruff format --check tool tests
       - run: uv run ruff check tool tests
       - run: uv run pytest -q
-      - run: uv run python tool/validate_manifest.py
+      # main ist live auf GitHub Pages: nur geprüfte, frei lizenzierte Assets mit Prüfbericht
+      - run: uv run python tool/validate_manifest.py --release
